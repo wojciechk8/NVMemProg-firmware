@@ -37,19 +37,19 @@
 void delay_us(BYTE us) {
   // sdcc generated assembly
   /*
-          00101$:
-          ;	delay_us.c:69: SYNCDELAY5;
-     1    	nop
-     1    	nop
-     1    	nop
-     1    	nop
-     1    	nop
-          ;	delay_us.c:70: }while(--us);
-     1    	mov	a,r7
-     1    	dec	a
-     1    	mov	r6,a
-     1    	mov	r7,a
-     3    	jnz	00101$
+    00101$:
+    ;	delay_us.c:59: SYNCDELAY9;
+      nop 
+      nop 
+      nop 
+      nop 
+      nop 
+      nop 
+      nop 
+      nop 
+      nop 
+    ;	delay_us.c:60: }while(--us);
+      djnz	r6,00101$
 
   * loop: 12 cycles = 999,6ns for 48MHz
   */
