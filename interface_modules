@@ -1,0 +1,22 @@
+1.Dla każdego interfejsu kompilowany jest oddzielnie kompletny firmware.
+  Dla poszczególnych interfejsów kompilowany jest program z modułem
+  zawierającym kod danego interfejsu.
+  
+2.Moduły znajdują się w osobnym folderze. Dla każdego z nich kompilowany
+  jest osobno cały firmware, wraz z kodem wspólnym (w głównym folderze).
+  Nazwa pliku wynikowego dla każdego modułu generowana jest wg wzorca:
+    nvmemprog_[nazwa modułu].ihx
+
+3.Moduł interfejsu powinien zawierać implementację interfejsu do pamięci
+  (np. równoległy, SPI, I2C). Może być ona zrealizowana przez GPIF lub
+  programowo. W każdym przypadku dane z/do pamięci powinny być
+  przesyłane przez endpointy do tego przeznaczone (EP2, EP6).
+
+4.Moduły mogą posiadać konfigurację, która ustawiana jest przez hosta.
+  Dotyczyć ona może np. czasów trwania cykli interfejsu komunikacyjnego,
+  pojemności pamięci itp.
+
+3.W każdym module powinny znajdować się następujące elementy:
+  - konfiguracja GPIF (w przypadku, gdy nieużywany - konfiguracja
+    portów)
+  - 
