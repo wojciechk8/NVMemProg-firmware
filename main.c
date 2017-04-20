@@ -27,7 +27,7 @@
 
 
 volatile __bit dosud=FALSE;
-volatile __bit doep1=FALSE;
+volatile __bit doep1out=FALSE;
 
 // custom functions
 extern void main_loop(void);
@@ -55,8 +55,14 @@ void hispeed_isr() __interrupt HISPEED_ISR
 
 void ep1out_isr() __interrupt EP1OUT_ISR
 {
-  doep1 = TRUE;
+  doep1out = TRUE;
   CLEAR_EP1OUT();
+}
+
+void ep1in_isr() __interrupt EP1IN_ISR
+{
+  handle_ep1in();
+  CLEAR_EP1IN();
 }
 
 void int1_isr() __interrupt IE1_ISR
@@ -98,8 +104,8 @@ void main()
       dosud=FALSE;
       handle_setupdata();
     }
-    if(doep1){
-      doep1 = FALSE;
+    if(doep1out){
+      doep1out = FALSE;
       handle_ep1out();
     }
   }

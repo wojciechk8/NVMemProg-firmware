@@ -48,6 +48,16 @@ enum{
   EP1STATE_IFC_CONFIG
 }ep1state = EP1STATE_NOTHING;
 
+typedef struct{
+  BYTE sw;
+  BYTE dcok;
+  BYTE ocprot;
+  BYTE fpga;
+  WORD data_left;
+}DEVICE_STATUS;
+
+volatile __bit ocprot=FALSE;
+
 
 
 BOOL handle_get_descriptor()
@@ -248,7 +258,7 @@ BOOL handle_vendorcommand(BYTE cmd)
 }
 
 
-//********************* ENDPOINT HANDLERS ******************************
+//*********************** ENDPOINT HANDLERS ****************************
 
 
 void handle_ep1out(void)
@@ -288,6 +298,22 @@ void handle_ep1out(void)
     default:
       EP1OUTCS |= bmEPSTALL;
   }
+}
+
+
+void handle_ep1in(void)
+{
+  DEVICE_STATUS *dev_status = (DEVICE_STATUS*)EP1INBUF;
+  
+  dev_status.sw = GPIO_SW_STATE();
+  dev_status.dcok = GPIO_DCOK_STATE();
+  dev_status.ocprot = ocprot;
+  dev_status.fpga = fpga_get_status();
+  dev_status.data_left = ifc_get_data_count();
+  
+  EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
+  
+  ocprot = 0;
 }
 
 
