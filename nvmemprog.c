@@ -169,8 +169,12 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_DRIVER_CONFIG:
-      EP1OUTBC = 0; // arm EP1OUT
-      ep1state = EP1STATE_DRIVER_CONFIG;
+      EP0BCL = 0;               // arm EP0
+      while (EP0CS & bmEPBUSY)  // wait for OUT data
+        ;
+      if(!driver_write_config(EP0BUF, EP0BCL)){
+        STALLEP0();
+      }
       break;
 
     case CMD_PWR_SET_DAC:

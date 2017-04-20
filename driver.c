@@ -47,7 +47,7 @@ BOOL driver_read_id(BYTE *id)
 }
 
 
-BOOL driver_write_config(BYTE len, BYTE *data)
+BOOL driver_write_config(BYTE *data, BYTE len)
 {
   if(GPIO_DRIVER_EN_STATE()){
     return FALSE;
