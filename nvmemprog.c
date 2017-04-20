@@ -363,19 +363,17 @@ void main_init(void)
 
 
   // Endpoints configuration
-  EP1OUTCFG = 0xA0;   // BULK 64B
+  EP1OUTCFG = bmVALID|bmTYPE1;        // BULK 64B
   SYNCDELAY;
-  EP1INCFG = 0xB0;    // INT 64B
+  EP1INCFG = bmVALID|bmTYPE1|bmTYPE0; // INT 64B
   SYNCDELAY;
-  EP2CFG = 0xA2;  // BULK OUT 512B X2
+  EP2CFG = bmVALID|bmTYPE1|0x2;       // BULK OUT 512B X2
   SYNCDELAY;
-  EP6CFG = 0xE2;  // BULK IN 512B X2
+  EP6CFG = bmVALID|bmDIR|bmTYPE1|0x2; // BULK IN 512B X2
   SYNCDELAY;
-  EP4CFG = 0x20;  // OFF
+  EP4CFG = bmTYPE1;  // OFF
   SYNCDELAY;
-  EP8CFG = 0x20;  // OFF
-  
-  //ifc_init();
+  EP8CFG = bmTYPE1;  // OFF
 }
 
 
