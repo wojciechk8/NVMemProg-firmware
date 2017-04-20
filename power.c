@@ -228,14 +228,11 @@ void pwr_switch_off(void)
   GPIO_PWRSW_CLK_UNSET();
   GPIO_PWRSW_D_UNSET();
   GPIO_PWRSW_CLK_SET();
-  delay_us(10);
-  GPIO_LEDR_OFF();
 }
 
 
 void pwr_switch_on(void)
 {
-  GPIO_LEDR_OFF();
   GPIO_PWRSW_CLK_UNSET();
   GPIO_PWRSW_D_SET();
   GPIO_PWRSW_CLK_SET();

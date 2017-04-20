@@ -216,8 +216,13 @@ BOOL handle_vendorcommand(BYTE cmd)
 
     case CMD_PWR_SWITCH:
       if(SETUPDAT[2] == 0x00){
+        // Suppress OCPROT# interrupt when safely switching power off 
+        EX1 = 0;
         pwr_switch_off();
+        delay_us(10);
+        EX1 = 1;
       }else if(SETUPDAT[2] == 0x01){
+        GPIO_LEDR_OFF();
         pwr_switch_on();
       }else{
         STALLEP0();
