@@ -78,7 +78,7 @@ inline void fpga_init(void)
 
 
 BOOL fpga_start_config();
-BOOL fpga_write_config(BYTE len, BYTE *data);
+BOOL fpga_write_config(BYTE *data, BYTE len);
 FPGA_CFG_STATUS fpga_get_status();
 
 
