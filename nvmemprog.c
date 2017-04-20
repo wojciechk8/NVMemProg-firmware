@@ -276,17 +276,6 @@ void handle_ep1out(void)
       ep1state = EP1STATE_NOTHING;
       break;
 
-    case EP1STATE_DRIVER_CONFIG:
-      if(!driver_write_config(EP1OUTBC, EP1OUTBUF)){
-        EP1OUTCS |= bmEPSTALL;
-      }
-      ep1state = EP1STATE_NOTHING;
-      break;
-    
-    case EP1STATE_IFC_CONFIG:
-      
-      break;
-
     default:
       EP1OUTCS |= bmEPSTALL;
   }
