@@ -27,6 +27,7 @@ typedef enum{                  // wValue         wIndex          IN/OUT data
   CMD_SW=0x11,                 // ---            ---             SW, DCOK state
                                //                                (byte 0: SW,
                                //                                 byte 1: DCOK)
+  CMD_VERSION=0x12             // ---            ---             FW version
 
 
   CMD_FPGA_START_CONFIG=0x20,  // ---            ---             ---(data via EP1)

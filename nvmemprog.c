@@ -35,6 +35,8 @@
 #include "ifc_mod/module.h"
 
 
+#define FW_VERSION 0x0001
+
 #define SYNCDELAY SYNCDELAY3
 
 
@@ -118,6 +120,13 @@ BOOL handle_vendorcommand(BYTE cmd)
     case CMD_SW:
       EP0BUF[0] = GPIO_SW_STATE();
       EP0BUF[1] = GPIO_DCOK_STATE();
+      EP0BCH=0;
+      EP0BCL=2;
+      break;
+    
+    case CMD_VERSION:
+      EP0BUF[0] = LSB(FW_VERSION);
+      EP0BUF[1] = MSB(FW_VERSION);
       EP0BCH=0;
       EP0BCL=2;
       break;
@@ -354,18 +363,17 @@ void main_init(void)
 
 
   // Endpoints configuration
-  EP1OUTCFG = 0xA0;
+  EP1OUTCFG = 0xA0;   // BULK 64B
   SYNCDELAY;
-  EP1INCFG = 0xA0;
+  EP1INCFG = 0xB0;    // INT 64B
   SYNCDELAY;
-  EP2CFG = 0xA2;  // BULK OUT 512B
+  EP2CFG = 0xA2;  // BULK OUT 512B X2
   SYNCDELAY;
-  EP6CFG = 0xE2;  // BULK IN 512B
+  EP6CFG = 0xE2;  // BULK IN 512B X2
   SYNCDELAY;
   EP4CFG = 0x20;  // OFF
   SYNCDELAY;
   EP8CFG = 0x20;  // OFF
-  SYNCDELAY;
   
   //ifc_init();
 }
