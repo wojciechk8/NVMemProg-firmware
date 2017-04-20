@@ -49,16 +49,22 @@ BOOL driver_read_id(BYTE *id)
 
 BOOL driver_write_config(BYTE *data, BYTE len)
 {
+  BYTE temp;
+  
   if(GPIO_DRIVER_EN_STATE()){
     return FALSE;
   }
 
+  // Set cpu frequency to 12MHz, so that serial baud is limited to 1MHz
+  temp = CPUCS;
+  CPUCS = (temp & ~bmCLKSPD);
   while(len--){
     while(!TI1)
       ;
     TI1 = 0;
     SBUF1 = *(data++);
   }
+  CPUCS = temp;
 
   configured = TRUE;
   return TRUE;

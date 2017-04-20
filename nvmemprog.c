@@ -331,7 +331,7 @@ void gpif_init(void)
 
 void main_init(void)
 {
-  SETCPUFREQ(CLK_24M);
+  SETCPUFREQ(CLK_48M);
   SYNCDELAY;
   REVCTL=3;
   SYNCDELAY;
