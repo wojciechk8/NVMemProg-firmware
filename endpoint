@@ -1,0 +1,7 @@
+EP0: General configuration
+
+EP1 IN: Status
+EP1 OUT: FPGA configuration
+
+EP2 OUT: Data to memory
+EP6 IN: Data from memory
