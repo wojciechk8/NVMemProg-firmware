@@ -36,8 +36,7 @@ inline void driver_init(void)
 
 
 BOOL driver_read_id(BYTE *id);
-BOOL driver_write_config(BYTE len, BYTE *data);
-// Enabling allowed only after configuration.
-BOOL driver_enable(void);
+BOOL driver_write_config(BYTE *data, BYTE len);
+BOOL driver_enable(void); // Enabling allowed only after configuration.
 void driver_disable(void);
 void driver_reset_status(void);

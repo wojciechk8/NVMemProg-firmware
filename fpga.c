@@ -56,7 +56,7 @@ BOOL fpga_start_config()
 }
 
 
-BOOL fpga_write_config(BYTE len, BYTE *data)
+BOOL fpga_write_config(BYTE *data, BYTE len)
 {
   while(len--){
     TI = 0;
@@ -82,4 +82,3 @@ FPGA_CFG_STATUS fpga_get_status()
 {
   return status;
 }
-

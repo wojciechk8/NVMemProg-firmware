@@ -178,8 +178,12 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_DRIVER_CONFIG:
-      EP1OUTBC = 0; // arm EP1OUT
-      ep1state = EP1STATE_DRIVER_CONFIG;
+      EP0BCL = 0;               // arm EP0
+      while (EP0CS & bmEPBUSY)  // wait for OUT data
+        ;
+      if(!driver_write_config(EP0BUF, EP0BCL)){
+        STALLEP0();
+      }
       break;
 
     case CMD_PWR_SET_DAC:
@@ -253,7 +257,7 @@ void handle_ep1out(void)
 
   switch(ep1state){
     case EP1STATE_FPGA_CONFIG:
-      if(!fpga_write_config(EP1OUTBC, EP1OUTBUF)){
+      if(!fpga_write_config(EP1OUTBUF, EP1OUTBC)){
         EP1OUTCS |= bmEPSTALL;
       }
       if(fpga_get_status() == FPGA_STATUS_CONFIGURED){
@@ -279,17 +283,6 @@ void handle_ep1out(void)
         EP1OUTCS |= bmEPSTALL;
       }
       ep1state = EP1STATE_NOTHING;
-      break;
-
-    case EP1STATE_DRIVER_CONFIG:
-      if(!driver_write_config(EP1OUTBC, EP1OUTBUF)){
-        EP1OUTCS |= bmEPSTALL;
-      }
-      ep1state = EP1STATE_NOTHING;
-      break;
-    
-    case EP1STATE_IFC_CONFIG:
-      
       break;
 
     default:
@@ -347,7 +340,7 @@ void gpif_init(void)
 
 void main_init(void)
 {
-  SETCPUFREQ(CLK_24M);
+  SETCPUFREQ(CLK_48M);
   SYNCDELAY;
   REVCTL=3;
   SYNCDELAY;
