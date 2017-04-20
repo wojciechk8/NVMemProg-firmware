@@ -82,4 +82,3 @@ FPGA_CFG_STATUS fpga_get_status()
 {
   return status;
 }
-

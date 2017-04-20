@@ -25,28 +25,34 @@
 #include "gpio.h"
 
 
-/* fpga register values
+/* FPGA registers
  *
- * mem_mux:
- * 0-15: data_fx [0-15]
- * 16-24: addr_fx [0-8]
- * 25-29: ctl_fx [0-4]
- * 30: '0'
- * 31: '1'
+ * mem_mux (addr 0..47):
+ *   0-15: data_fx [0-15]
+ *   16-24: addr_fx [0-8]
+ *   25-29: ctl_fx [0-4]
+ *   30: '0'
+ *   31: '1'
+ *   
+ *   The MSB (bit 5) is output enable
+ *   (the actual OE depends also on data_dir(ctl5),
+ *    if selected signal is data_fx)
  *
- * The MSB (bit 5) is output enable
- * (the actual oe depends also on data_dir(ctl5),
- *  if selected signal is data_fx)
- *
- * rdy_fx_mux:
- * 0-47: mem_pin [0:47]
+ * rdy_fx_mux (addr 48..49):
+ *   0-47: mem_pin [0:47]
+ * 
+ * reset (addr >= 64):
+ *   writing anything to this address will reset the OE bit of all
+ *   memory pins
  */
 typedef union{
   struct{
     BYTE mem_mux[48];
     BYTE rdy_fx_mux[2];
+    BYTE reserved[14];
+    BYTE reset;
   };
-  BYTE reg[50];
+  BYTE reg[65];
 }FPGA_REGS;
 
 #define FPGA_REG_NUM sizeof(FPGA_REGS)
@@ -60,6 +66,7 @@ typedef enum{
 }FPGA_CFG_STATUS;
 
 
+
 inline void fpga_init(void)
 {
   GPIO_FPGA_CONFIG_UNSET();
@@ -69,8 +76,14 @@ inline void fpga_init(void)
   SCON0 = 0;
 }
 
-// Altera Cyclone PS Configuration (AN 250)
+
 BOOL fpga_start_config();
 BOOL fpga_write_config(BYTE len, BYTE *data);
 FPGA_CFG_STATUS fpga_get_status();
+
+
+inline void fpga_reset_regs()
+{
+  fpga_regs.reset = 0xFF;
+}
 
