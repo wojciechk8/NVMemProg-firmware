@@ -14,20 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * vendor_req.h
+ * common.h
+ * Defines and types common with the host software
  *
  */
 
 #pragma once
 
 
+// Vendor USB Commands
 typedef enum{                  // wValue         wIndex          IN/OUT data
-  
   CMD_LED=0x10,                // 0=off 1=on     0=green 1=red   ---
   CMD_SW=0x11,                 // ---            ---             SW, DCOK state
                                //                                (byte 0: SW,
                                //                                 byte 1: DCOK)
-  CMD_VERSION=0x12             // ---            ---             FW version
+  CMD_VERSION=0x12,            // ---            ---             FW version
 
 
   CMD_FPGA_START_CONFIG=0x20,  // ---            ---             ---(data via EP1)
@@ -59,5 +60,46 @@ typedef enum{                  // wValue         wIndex          IN/OUT data
   
   
   CMD_IFC_SET_CONFIG=0x60      // ---            config_type     data
-  
 }VENDOR_CMD;
+
+
+// FPGA
+typedef enum{
+  FPGA_STATUS_UNCONFIGURED,
+  FPGA_STATUS_CONFIGURING,
+  FPGA_STATUS_CONFIGURED
+}FPGA_CFG_STATUS;
+
+
+// Power
+typedef enum{
+  PWR_CH_VPP=0x0,
+  PWR_CH_VCC=0x1,
+  PWR_CH_IPP=0x2,
+  PWR_CH_ICC=0x3
+}PWR_CH;
+
+
+// EEPROM
+#define EEPROM_ADDR 0x51
+enum{
+  EEPROM_HEADER=0x00,
+  EEPROM_VID=0x01,
+  EEPROM_PID=0x03,
+  EEPROM_DID=0x05,
+  EEPROM_CONFIG=0x07,
+  EEPROM_CALIB_HEADER=0x08,
+  EEPROM_CALIB_A=0x0A,
+  EEPROM_CALIB_B=0x10
+};
+
+
+// Device Status
+typedef struct{
+  BYTE sw;
+  BYTE dcok;
+  BYTE ocprot;
+  BYTE fpga;
+  WORD data_left;
+}DEVICE_STATUS;
+

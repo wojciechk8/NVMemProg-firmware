@@ -25,8 +25,6 @@
 
 #include "gpio.h"
 #include "power.h"
-#include "eeprom.h"
-#include "delay_us.h"
 
 
 #define DAC_ADDR 0x60

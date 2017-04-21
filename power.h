@@ -23,13 +23,7 @@
 #include <fx2types.h>
 #include <stdint.h>
 
-
-typedef enum{
-  PWR_CH_VPP=0x0,
-  PWR_CH_VCC=0x1,
-  PWR_CH_IPP=0x2,
-  PWR_CH_ICC=0x3
-}PWR_CH;
+#include "common.h"
 
 
 void pwr_init(void);

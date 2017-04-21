@@ -30,8 +30,8 @@
 #include "power.h"
 #include "fpga.h"
 #include "gpio.h"
-#include "eeprom.h"
-#include "vendor_req.h"
+#include "delay_us.h"
+#include "common.h"
 #include "ifc_mod/module.h"
 
 
@@ -47,14 +47,6 @@ enum{
   EP1STATE_DRIVER_CONFIG,
   EP1STATE_IFC_CONFIG
 }ep1state = EP1STATE_NOTHING;
-
-typedef struct{
-  BYTE sw;
-  BYTE dcok;
-  BYTE ocprot;
-  BYTE fpga;
-  WORD data_left;
-}DEVICE_STATUS;
 
 volatile __bit ocprot=FALSE;
 
@@ -310,11 +302,11 @@ void handle_ep1in(void)
 {
   DEVICE_STATUS *dev_status = (DEVICE_STATUS*)EP1INBUF;
   
-  dev_status.sw = GPIO_SW_STATE();
-  dev_status.dcok = GPIO_DCOK_STATE();
-  dev_status.ocprot = ocprot;
-  dev_status.fpga = fpga_get_status();
-  dev_status.data_left = ifc_get_data_count();
+  dev_status->sw = GPIO_SW_STATE();
+  dev_status->dcok = GPIO_DCOK_STATE();
+  dev_status->ocprot = ocprot;
+  dev_status->fpga = fpga_get_status();
+  //dev_status->data_left = ifc_get_data_left();
   
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
   
@@ -385,7 +377,6 @@ void main_init(void)
   driver_init();
   pwr_init();
 
-
   // Endpoints configuration
   EP1OUTCFG = bmVALID|bmTYPE1;        // BULK 64B
   SYNCDELAY;
@@ -398,6 +389,8 @@ void main_init(void)
   EP4CFG = bmTYPE1;  // OFF
   SYNCDELAY;
   EP8CFG = bmTYPE1;  // OFF
+  
+  handle_ep1in();
 }
 
 

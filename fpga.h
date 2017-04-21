@@ -23,6 +23,7 @@
 #include <fx2types.h>
 
 #include "gpio.h"
+#include "common.h"
 
 
 /* FPGA registers
@@ -55,15 +56,9 @@ typedef union{
   BYTE reg[65];
 }FPGA_REGS;
 
+
 #define FPGA_REG_NUM sizeof(FPGA_REGS)
 extern volatile __xdata __at 0x4000 FPGA_REGS fpga_regs;
-
-
-typedef enum{
-  FPGA_STATUS_UNCONFIGURED,
-  FPGA_STATUS_CONFIGURING,
-  FPGA_STATUS_CONFIGURED
-}FPGA_CFG_STATUS;
 
 
 

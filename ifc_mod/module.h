@@ -21,9 +21,14 @@
 
 #pragma once
 
+#include <fx2types.h>
+
 
 void ifc_init(void);
 
+void ifc_set_config(void);
+
 void ifc_read_memory(void);
 void ifc_write_memory(void);
-void ifc_set_config(void);
+
+WORD ifc_get_data_count();
