@@ -100,6 +100,6 @@ typedef struct{
   BYTE dcok;
   BYTE ocprot;
   BYTE fpga;
-  WORD data_left;
+  WORD data_cnt;
 }DEVICE_STATUS;
 

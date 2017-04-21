@@ -301,19 +301,41 @@ void handle_ep1out(void)
 void handle_ep1in(void)
 {
   static __bit sw_last=FALSE;
-  DEVICE_STATUS *dev_status = (DEVICE_STATUS*)EP1INBUF;
+
+  __asm
+    mov	_AUTOPTRH2,(#_EP1INBUF >> 8)
+    mov	_AUTOPTRL2,#_EP1INBUF
+    mov	dptr,#_XAUTODAT2
+  __endasm;
   
   if((!sw_last) && GPIO_SW_STATE()){
-    dev_status->sw = 1;
+    __asm
+      mov	a,#0x01
+      movx	@dptr,a
+    __endasm;
   }else{
-    dev_status->sw = 0;
+    __asm
+      clr	a
+      movx	@dptr,a
+    __endasm;
   }
   sw_last = GPIO_SW_STATE();
   
-  dev_status->dcok = GPIO_DCOK_STATE();
-  dev_status->ocprot = ocprot;
-  dev_status->fpga = fpga_get_status();
-  //dev_status->data_left = ifc_get_data_left();
+  // XAUTODAT2 = GPIO_DCOK_STATE();
+  // XAUTODAT2 = ocprot;
+  __asm
+    mov	c,_PA4
+    clr	a
+    rlc	a
+    movx	@dptr,a
+    mov	c,_ocprot
+    clr	a
+    rlc	a
+    movx	@dptr,a
+  __endasm;
+  
+  XAUTODAT2 = fpga_get_status();
+  //XAUTODAT2 = ifc_get_data_count();
   
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
 
