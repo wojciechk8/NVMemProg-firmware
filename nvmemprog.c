@@ -118,13 +118,6 @@ BOOL handle_vendorcommand(BYTE cmd)
         GPIO_LEDR = SETUPDAT[2];
       }
       break;
-
-    case CMD_SW:
-      EP0BUF[0] = GPIO_SW_STATE();
-      EP0BUF[1] = GPIO_DCOK_STATE();
-      EP0BCH=0;
-      EP0BCL=2;
-      break;
     
     case CMD_VERSION:
       EP0BUF[0] = LSB(FW_VERSION);
@@ -140,12 +133,6 @@ BOOL handle_vendorcommand(BYTE cmd)
       }else{
         STALLEP0();
       }
-      break;
-
-    case CMD_FPGA_CONFIG_STATUS:
-      EP0BUF[0] = fpga_get_status();
-      EP0BCH=0;
-      EP0BCL=1;
       break;
 
     case CMD_FPGA_WRITE_REG:
@@ -219,12 +206,6 @@ BOOL handle_vendorcommand(BYTE cmd)
       }else{
         STALLEP0();
       }
-      break;
-    
-    case CMD_PWR_STATE:
-      EP0BUF[0] = GPIO_PWRSW_STATE();
-      EP0BCH=0;
-      EP0BCL=1;
       break;
 
     case CMD_PWR_RESET:

@@ -25,16 +25,12 @@
 // Vendor USB Commands
 typedef enum{                  // wValue         wIndex          IN/OUT data
   CMD_LED=0x10,                // 0=off 1=on     0=green 1=red   ---
-  CMD_SW=0x11,                 // ---            ---             SW, DCOK state
-                               //                                (byte 0: SW,
-                               //                                 byte 1: DCOK)
-  CMD_VERSION=0x12,            // ---            ---             FW version
+  CMD_VERSION=0x11,            // ---            ---             FW version
 
 
   CMD_FPGA_START_CONFIG=0x20,  // ---            ---             ---(data via EP1)
-  CMD_FPGA_CONFIG_STATUS=0x21, // ---            ---             fpga status
-  CMD_FPGA_WRITE_REG=0x22,     // reg value      reg addr        ---
-  CMD_FPGA_WRITE_REGS=0x23,    // ---            ---             ---(data via EP1)
+  CMD_FPGA_WRITE_REG=0x21,     // reg value      reg addr        ---
+  CMD_FPGA_WRITE_REGS=0x22,    // ---            ---             ---(data via EP1)
 
 
   CMD_DRIVER_ENABLE=0x30,      // 0xA5=en.       ---             ---
@@ -50,9 +46,7 @@ typedef enum{                  // wValue         wIndex          IN/OUT data
                                // slew rate(MSB)
   CMD_PWR_SET_CURRENT=0x42,    // value          0=IPP 1=ICC     ---
   CMD_PWR_SWITCH=0x43,         // 0=off 1=on     ---             ---
-  CMD_PWR_STATE=0x44,          // ---            ---             PWR switch state
-                               //                                (1=on)
-  CMD_PWR_RESET=0x45,          // ---            ---             ---
+  CMD_PWR_RESET=0x44,          // ---            ---             ---
 
 
   CMD_EEPROM_READ=0x50,        // length         addr            data
