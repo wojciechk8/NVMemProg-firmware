@@ -73,7 +73,7 @@ inline void fpga_init(void)
 
 
 BOOL fpga_start_config();
-BOOL fpga_write_config(BYTE *data, BYTE len);
+BOOL fpga_write_config(BYTE len); // Data pointed by autopointer 1
 FPGA_CFG_STATUS fpga_get_status();
 
 

@@ -245,7 +245,12 @@ void handle_ep1out(void)
 
   switch(ep1state){
     case EP1STATE_FPGA_CONFIG:
-      if(!fpga_write_config(EP1OUTBUF, EP1OUTBC)){
+      __asm
+        ; source
+        mov	_AUTOPTRH1,(#_EP1OUTBUF >> 8)
+        mov	_AUTOPTRL1,#_EP1OUTBUF
+      __endasm;
+      if(!fpga_write_config(EP1OUTBC)){
         EP1OUTCS |= bmEPSTALL;
       }
       if(fpga_get_status() == FPGA_STATUS_CONFIGURED){

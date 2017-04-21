@@ -56,17 +56,18 @@ BOOL fpga_start_config()
 }
 
 
-BOOL fpga_write_config(BYTE *data, BYTE len)
+// Data pointed by autopointer 1
+BOOL fpga_write_config(BYTE len)
 {
   while(len--){
-    TI = 0;
-    SBUF0 = *(data++);
+    //TI = 0;
+    SBUF0 = XAUTODAT1;
     if(GPIO_FPGA_STATUS_STATE()){
       status = FPGA_STATUS_UNCONFIGURED;
       return FALSE;
     }
-    while(!TI)
-      ;
+    //while(!TI)
+    //  ;
   }
 
   if(GPIO_FPGA_CONFDONE_STATE()){
