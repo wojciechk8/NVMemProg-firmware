@@ -257,12 +257,14 @@ void handle_ep1out(void)
 
     case EP1STATE_FPGA_REGS:
       if(EP1OUTBC <= FPGA_REG_NUM){
-        // source
-        AUTOPTRH1 = MSB(EP1OUTBUF);
-        AUTOPTRL1 = LSB(EP1OUTBUF);
-        // destination
-        AUTOPTRH2 = MSB(fpga_regs.reg);
-        AUTOPTRL2 = LSB(fpga_regs.reg);
+        __asm
+          ; source
+          mov	_AUTOPTRH1,(#_EP1OUTBUF >> 8)
+          mov	_AUTOPTRL1,#_EP1OUTBUF
+          ; destination
+          mov	_AUTOPTRH2,(#_fpga_regs >> 8)
+          mov	_AUTOPTRL2,#_fpga_regs
+        __endasm;
         // transfer
         for (i = 0x00; i < EP1OUTBC; i++){
           XAUTODAT2 = XAUTODAT1;
