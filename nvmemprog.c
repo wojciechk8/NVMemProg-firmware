@@ -300,21 +300,38 @@ void handle_ep1out(void)
 
 void handle_ep1in(void)
 {
+  static __bit sw_last=FALSE;
   DEVICE_STATUS *dev_status = (DEVICE_STATUS*)EP1INBUF;
   
-  dev_status->sw = GPIO_SW_STATE();
+  if((!sw_last) && GPIO_SW_STATE()){
+    dev_status->sw = 1;
+  }else{
+    dev_status->sw = 0;
+  }
+  sw_last = GPIO_SW_STATE();
+  
   dev_status->dcok = GPIO_DCOK_STATE();
   dev_status->ocprot = ocprot;
   dev_status->fpga = fpga_get_status();
   //dev_status->data_left = ifc_get_data_left();
   
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
-  
+
   ocprot = 0;
 }
 
 
-//***************************** INIT ***********************************
+//************************** OTHER HANDLERS ****************************
+
+
+void handle_ocprot(void)
+{
+  GPIO_LEDR_ON();
+  ocprot = 1;
+}
+
+
+//******************************* INIT *********************************
 
 
 void gpif_init(void)

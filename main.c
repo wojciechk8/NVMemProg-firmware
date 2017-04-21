@@ -23,8 +23,6 @@
 #include <delay.h>
 #include <setupdat.h>
 
-#include "gpio.h"
-
 
 volatile __bit dosud=FALSE;
 volatile __bit doep1out=FALSE;
@@ -33,6 +31,8 @@ volatile __bit doep1out=FALSE;
 extern void main_loop(void);
 extern void main_init(void);
 extern void handle_ep1out(void);
+extern void handle_ep1in(void);
+extern void handle_ocprot(void);
 
 
 void sudav_isr() __interrupt SUDAV_ISR
@@ -65,9 +65,9 @@ void ep1in_isr() __interrupt EP1IN_ISR
   CLEAR_EP1IN();
 }
 
-void int1_isr() __interrupt IE1_ISR
+void ie1_isr() __interrupt IE1_ISR
 {
-  GPIO_LEDR_ON();
+  handle_ocprot();
 }
 
 
