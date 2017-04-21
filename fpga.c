@@ -56,7 +56,7 @@ BOOL fpga_start_config()
 }
 
 
-// Data pointed by autopointer 1
+// Data pointed by the autopointer 1
 BOOL fpga_write_config(BYTE len)
 {
   while(len--){

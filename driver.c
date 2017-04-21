@@ -47,7 +47,8 @@ BOOL driver_read_id(BYTE *id)
 }
 
 
-BOOL driver_write_config(BYTE *data, BYTE len)
+// Data pointed by the autopointer 1
+BOOL driver_write_config(BYTE len)
 {
   BYTE temp;
   
@@ -62,7 +63,7 @@ BOOL driver_write_config(BYTE *data, BYTE len)
     while(!TI1)
       ;
     TI1 = 0;
-    SBUF1 = *(data++);
+    SBUF1 = XAUTODAT1;
   }
   CPUCS = temp;
 

@@ -170,7 +170,12 @@ BOOL handle_vendorcommand(BYTE cmd)
       EP0BCL = 0;               // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
-      if(!driver_write_config(EP0BUF, EP0BCL)){
+      __asm
+        ; source
+        mov	_AUTOPTRH1,(#_EP0BUF >> 8)
+        mov	_AUTOPTRL1,#_EP0BUF
+      __endasm;
+      if(!driver_write_config(EP0BCL)){
         STALLEP0();
       }
       break;
