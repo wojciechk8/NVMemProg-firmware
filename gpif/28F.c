@@ -46,20 +46,20 @@
 //          _________ _________ _________ _________ _________ _________ _________ _________
 //                                                                                         
 // AddrMode Same Val  Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
-// DataMode NO Data   Activate  Activate  Activate  Activate  Activate  Activate           
+// DataMode NO Data   Activate  NO Data   NO Data   NO Data   NO Data   NO Data            
 // NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 8    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
-//   Term A                                                                                
-//   LFunc                                                                                 
-//   Term B                                                                                
-// Branch1                                                                                 
-// Branch0                                                                                 
-// Re-Exec                                                                                 
+// IF/Wait  Wait 8    Wait 1    IF        Wait 1    Wait 1    Wait 1    Wait 1             
+//   Term A                     IntReady                                                   
+//   LFunc                      AND                                                        
+//   Term B                     IntReady                                                   
+// Branch1                      ThenIdle                                                   
+// Branch0                      ElseIdle                                                   
+// Re-Exec                      No                                                         
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // CE#          0         0         0         0         0         0         0         0    
 // WE#          1         1         1         1         1         1         1         1    
-// OE#          0         0         0         0         0         0         0         1    
+// OE#          0         0         1         1         1         1         1         1    
 // CTL3         0         0         0         0         0         0         0         0    
 // CTL4         0         0         0         0         0         0         0         0    
 // DIR          0         0         0         0         0         0         0         0    
@@ -76,20 +76,20 @@
 // DataMode Activate  NO Data   NO Data   NO Data   NO Data   NO Data   NO Data            
 // NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 5    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
-//   Term A                                                                                
-//   LFunc                                                                                 
-//   Term B                                                                                
-// Branch1                                                                                 
-// Branch0                                                                                 
-// Re-Exec                                                                                 
+// IF/Wait  Wait 5    Wait 1    IF        Wait 1    Wait 1    Wait 1    Wait 1             
+//   Term A                     IntReady                                                   
+//   LFunc                      AND                                                        
+//   Term B                     IntReady                                                   
+// Branch1                      ThenIdle                                                   
+// Branch0                      ElseIdle                                                   
+// Re-Exec                      No                                                         
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // CE#          0         0         0         0         0         0         0         0    
 // WE#          0         1         1         1         1         1         1         1    
 // OE#          1         1         1         1         1         1         1         1    
 // CTL3         0         0         0         0         0         0         0         0    
 // CTL4         0         0         0         0         0         0         0         0    
-// DIR          1         1         1         1         1         1         1         0    
+// DIR          1         1         0         0         0         0         0         0    
 //                     
 // END DO NOT EDIT     
 // DO NOT EDIT ...                                                                         
@@ -103,13 +103,13 @@
 // DataMode NO Data   Activate  NO Data   NO Data   NO Data   NO Data   NO Data            
 // NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 4    Wait 1    Wait 3    Wait 1    Wait 1    Wait 1    Wait 1             
-//   Term A                                                                                
-//   LFunc                                                                                 
-//   Term B                                                                                
-// Branch1                                                                                 
-// Branch0                                                                                 
-// Re-Exec                                                                                 
+// IF/Wait  Wait 4    Wait 1    Wait 2    IF        Wait 1    Wait 1    Wait 1             
+//   Term A                               IntReady                                         
+//   LFunc                                AND                                              
+//   Term B                               IntReady                                         
+// Branch1                                ThenIdle                                         
+// Branch0                                ElseIdle                                         
+// Re-Exec                                No                                               
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // CE#          0         0         0         0         0         0         0         0    
 // WE#          1         1         1         1         1         1         1         1    
@@ -159,20 +159,20 @@
 const char xdata WaveData[128] =     
 {                                      
 // Wave 0 
-/* LenBr */ 0x08,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x02,     0x02,     0x02,     0x02,     0x02,     0x02,     0x00,
-/* Output*/ 0x02,     0x02,     0x02,     0x02,     0x02,     0x02,     0x02,     0x06,
-/* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 1 
-/* LenBr */ 0x05,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x02,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x24,     0x26,     0x26,     0x26,     0x26,     0x26,     0x26,     0x06,
-/* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 2 
-/* LenBr */ 0x04,     0x01,     0x03,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x0A,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
-/* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
+/* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
+// Wave 1 
+/* LenBr */ 0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
+/* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
+// Wave 2 
+/* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
+/* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
 // Wave 3 
 /* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,

@@ -71,7 +71,7 @@ inline void gpio_init(void)
   // PORTC
   // GPIFADR[7:0]
   IOC = 0;
-  OEC = 0xFF;
+  OEC = 0;
 
   // PORTD
   // FD[15:8]
@@ -83,6 +83,6 @@ inline void gpio_init(void)
   // FPGA_DATA(RXD0OUT), FPGA_nCONFIG, FPGA_CONF_DONE, FPGA_nSTATUS
   PORTECFG = bmRXD1OUT|bmRXD0OUT;
   IOE = bmBIT2;
-  OEE = bmBIT7|bmBIT6|bmBIT5|bmBIT2;
+  OEE = bmBIT6|bmBIT5|bmBIT2;
 }
 

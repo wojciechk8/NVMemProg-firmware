@@ -97,3 +97,14 @@ typedef struct{
   WORD data_cnt;
 }DEVICE_STATUS;
 
+
+// Memory Interface
+typedef enum{
+  IFC_STATUS_IDLE=0,
+  IFC_STATUS_READING,
+  IFC_STATUS_WRITING
+}IFC_STATUS;
+
+typedef enum{
+  IFC_CFG_ADDRESS_MAPPING
+}IFC_CFG_TYPE;

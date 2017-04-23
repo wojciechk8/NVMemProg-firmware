@@ -28,7 +28,7 @@
 
 volatile __xdata __at 0x4000 FPGA_REGS fpga_regs;
 
-static __xdata FPGA_CFG_STATUS status;
+static FPGA_CFG_STATUS status;
 
 
 // Altera Cyclone PS Configuration (AN 250)

@@ -23,12 +23,17 @@
 
 #include <fx2types.h>
 
+#include "../common.h"
+
 
 void ifc_init(void);
 
-void ifc_set_config(void);
+BOOL ifc_set_config(IFC_CFG_TYPE type);   // Data pointed by the autopointer 1
 
-void ifc_read_memory(void);
-void ifc_write_memory(void);
+BOOL ifc_read_id(BYTE *id);
+BOOL ifc_erase_chip(void);
+BOOL ifc_prepare_read(DWORD addr);
+BOOL ifc_prepare_write(DWORD addr);
 
-WORD ifc_get_data_count();
+IFC_STATUS ifc_get_status(void);
+WORD ifc_get_data_count(void);

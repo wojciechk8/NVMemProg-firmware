@@ -348,59 +348,11 @@ void handle_ocprot(void)
 
 //******************************* INIT *********************************
 
-
-void gpif_init(void)
-{
-  BYTE i;
-
-  // GPIF config
-  GPIFABORT = 0xFF;  // abort any waveforms pending
-
-  GPIFREADYCFG = bmBIT7;    // IntReady
-  GPIFCTLCFG = 0x00;
-  GPIFIDLECS = 0x00;
-  GPIFIDLECTL = 0x00;
-  GPIFWFSELECT = 0x00;      // All triggers to waveform 0
-
-  // WaveForm
-  // source
-  //AUTOPTRH1 = MSB(&wave_data);
-  //AUTOPTRL1 = LSB(&wave_data);
-  // destination
-  AUTOPTRH2 = 0xE4;
-  AUTOPTRL2 = 0x00;
-  // transfer
-  /*for(i = 0x00; i < sizeof(wave_data); i++){
-    XAUTODAT2 = XAUTODAT1;
-  }*/
-
-  GPIO_SET_PORTC_GPIFADR();
-  // update GPIF address pins
-  SYNCDELAY;
-  GPIFADRH = 0x00;
-  SYNCDELAY;
-  GPIFADRL = 0x00;
-
-  // Configure GPIF FlowStates
-  FLOWSTATE = 0;
-  FLOWLOGIC = 0;
-  FLOWEQ0CTL = 0;
-  FLOWEQ1CTL = 0;
-  FLOWHOLDOFF = 0;
-  FLOWSTB = 0;
-  FLOWSTBEDGE = 0;
-  FLOWSTBHPERIOD = 0;
-}
-
-
 void main_init(void)
 {
   SETCPUFREQ(CLK_48M);
   SYNCDELAY;
   REVCTL=3;
-  SYNCDELAY;
-  IFCONFIG = bmIFCLKSRC|bm3048MHZ;      // IFCLK = Internal 48MHz
-  SYNCDELAY;
   I2CTL = bm400KHZ;                     // Set I2C to 400kHz
   AUTOPTRSETUP = bmBIT2|bmBIT1|bmBIT0;  // enable autoptr; increment both
 
