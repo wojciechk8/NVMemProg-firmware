@@ -16,6 +16,11 @@ XRAM_LOC:=--xram-loc 0x3c00
 SRC:=$(wildcard *.c)
 ASRC:=$(wildcard *.a51)
 
+# Memory interface modules
+IFCMODDIR:=ifc_mod
+IFCMODSRC:=$(wildcard $(IFCMODDIR)/*.c)
+IFCMODTARGETS:=$(addprefix $(TARGET)_,$(notdir $(basename $(IFCMODSRC))))
+
 # Other include directories
 INCDIR:=.
 
@@ -26,9 +31,6 @@ FX2LIBDIR:=/opt/fx2lib
 OBJDIR:=obj
 BINDIR:=bin
 
-# Enable debug output
-DEBUG:=--debug
-
 
 
 # Internal variables names
@@ -36,18 +38,22 @@ OBJ:=$(SRC:%.c=$(OBJDIR)/%.rel) $(ASRC:%.a51=$(OBJDIR)/%.rel)
 LST:=$(SRC:%.c=$(OBJDIR)/%.lst) $(ASRC:%.a51=$(OBJDIR)/%.lst)
 RST:=$(SRC:%.c=$(OBJDIR)/%.rst) $(ASRC:%.a51=$(OBJDIR)/%.rst)
 SYM:=$(SRC:%.c=$(OBJDIR)/%.sym) $(ASRC:%.a51=$(OBJDIR)/%.sym)
-ADB:=$(SRC:%.c=$(OBJDIR)/%.adb)
-ASM:=$(SRC:%.c=$(OBJDIR)/%.asm)
-IHX:=$(BINDIR)/$(TARGET).ihx
-BIX:=$(BINDIR)/$(TARGET).bix
-IIC:=$(BINDIR)/$(TARGET).iic
-CDB:=$(BINDIR)/$(TARGET).cdb
-OMF:=$(BINDIR)/$(TARGET).omf
-LK:=$(BINDIR)/$(TARGET).lk
-MEM:=$(BINDIR)/$(TARGET).mem
-MAP:=$(BINDIR)/$(TARGET).map
+ASM:=$(SRC:%.c=$(OBJDIR)/%.asm) 
+IHX:=$(addprefix $(BINDIR)/,$(addsuffix .ihx,$(IFCMODTARGETS)))
+BIX:=$(addprefix $(BINDIR)/,$(addsuffix .bix,$(IFCMODTARGETS)))
+IIC:=$(addprefix $(BINDIR)/,$(addsuffix .iic,$(IFCMODTARGETS)))
+LK:=$(addprefix $(BINDIR)/,$(addsuffix .lk,$(IFCMODTARGETS)))
+MEM:=$(addprefix $(BINDIR)/,$(addsuffix .mem,$(IFCMODTARGETS)))
+MAP:=$(addprefix $(BINDIR)/,$(addsuffix .map,$(IFCMODTARGETS)))
+
+IFCMODOBJ:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.rel)))
+IFCMODLST:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.lst)))
+IFCMODRST:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.rst)))
+IFCMODSYM:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.sym)))
+IFCMODASM:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.asm))) 
+
 # Dependecies
-DEPENDS:=$(SRC:%.c=$(OBJDIR)/%.d)
+DEPENDS:=$(SRC:%.c=$(OBJDIR)/%.d) $(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.d)))
 
 # Build tools
 CC:=sdcc
@@ -76,9 +82,9 @@ LDLIBS:=fx2.lib
 
 # Targets
 .PHONY: all
-all: $(IHX)
-#	 $(SIZE) $(IHX)
-	 cat $(MEM)
+all: $(BINDIR) $(OBJDIR) $(IFCMODDIR)/$(OBJDIR) $(IHX)
+#	$(foreach f,$(IHX),$(SIZE) $(f))
+	tail -n 5 $(MEM)
 
 .PHONY: ihx
 ihx: $(IHX)
@@ -91,7 +97,7 @@ iic: $(IIC)
 
 .PHONY: program
 program: $(IHX)
-	$(FX2PROG) -id=$(VID).$(PID) prg:$(IHX)
+	$(FX2PROG) -id=$(VID).$(PID) prg:$(BINDIR)/$(TARGET)_dummy.ihx
 	$(FX2PROG) -id=$(VID).$(PID) run
 	$(SIZE) $(IHX)
 
@@ -102,35 +108,41 @@ run: $(IHX)
 
 .PHONY: clean
 clean:
-	$(RM) $(IHX) $(BIX) $(IIC) $(MEM) $(MAP) $(LK) $(CDB) $(OMF) \
-$(OBJ) $(LST) $(RST) $(SYM) $(ADB) $(ASM) $(DEPENDS)
+	$(RM) $(IHX) $(BIX) $(IIC) $(MEM) $(MAP) $(LK) \
+$(OBJ) $(LST) $(RST) $(SYM) $(ASM) $(DEPENDS) \
+$(IFCMODOBJ) $(IFCMODLST) $(IFCMODRST) $(IFCMODSYM) $(IFCMODASM)
+
 
 # implicit rules
 $(OBJDIR)/%.rel: %.c
-	$(CC) $(DEBUG) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 	$(CC) -MM $(CFLAGS) -c $< -o $(patsubst %.rel,%.d,$@)
 	sed -i "1s/^/$(OBJDIR)\//" $(patsubst %.rel,%.d,$@)
 
 $(OBJDIR)/%.rel: %.a51
 	$(AS) -logs $(ASFLAGS) $@ $^
 
+$(IFCMODDIR)/$(OBJDIR)/%.rel: $(IFCMODDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) -MM $(CFLAGS) -c $< -o $(patsubst %.rel,%.d,$@)
+	sed -i "1s/^/$(IFCMODDIR)\/$(OBJDIR)\//" $(patsubst %.rel,%.d,$@)
+
+$(BINDIR)/$(TARGET)_%.ihx: $(IFCMODDIR)/$(OBJDIR)/%.rel $(OBJ)
+	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJ) $< -o $@
+
+$(BINDIR)/$(TARGET)_%.bix: $(BINDIR)/$(TARGET)_%.ihx
+	$(OBJCOPY) -I ihex -O binary $< $@
+
+$(BINDIR)/$(TARGET)_%.iic: $(BINDIR)/$(TARGET)_%.ihx
+	$(FX2LIBDIR)/utils/ihx2iic.py -v $(VID) -p $(PID) $< $@
+
 # explicit rules
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
+$(IFCMODDIR)/$(OBJDIR):
+	mkdir -p $(IFCMODDIR)/$(OBJDIR)
 $(BINDIR):
 	mkdir -p $(BINDIR)
-		
-$(IHX): $(BINDIR) $(OBJDIR) $(OBJ)
-	$(CC) $(DEBUG) $(LDFLAGS) $(LDLIBS) $(OBJ) -o $@
-
-#$(DIS): $(OMF)
-#	$(OBJDUMP) -S $< > $@
-
-$(BIX): $(IHX)
-	$(OBJCOPY) -I ihex -O binary $< $@
-	
-$(IIC): $(IHX)
-	$(FX2LIBDIR)/utils/ihx2iic.py -v $(VID) -p $(PID) $< $@
 
 # include dependecies
 -include $(DEPENDS)
