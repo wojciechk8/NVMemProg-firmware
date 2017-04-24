@@ -28,12 +28,15 @@
 
 void ifc_init(void);
 
-BOOL ifc_set_config(IFC_CFG_TYPE type);   // Data pointed by the autopointer 1
+BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param); // Data pointed by the autopointer 1
 
-BOOL ifc_read_id(BYTE *id);
+BOOL ifc_read_id(BYTE size, BYTE *id);
 BOOL ifc_erase_chip(void);
-BOOL ifc_prepare_read(DWORD addr);
-BOOL ifc_prepare_write(DWORD addr);
+BOOL ifc_prepare_read(void);
+BOOL ifc_prepare_write(void);
+void ifc_abort(void);
 
-IFC_STATUS ifc_get_status(void);
+BOOL ifc_busy(void);
 WORD ifc_get_data_count(void);
+
+void ifc_process(void);

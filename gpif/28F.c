@@ -18,7 +18,7 @@
 // Wave 0   = Read Byt     
 // Wave 1   = Write By     
 // Wave 2   = Read Dat     
-// Wave 3   = Unused       
+// Wave 3   = Write Da     
                          
 // GPIF Ctrl Outputs   Level   
 // CTL 0    = CE#      CMOS        
@@ -57,7 +57,7 @@
 // Branch0                      ElseIdle                                                   
 // Re-Exec                      No                                                         
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
-// CE#          0         0         0         0         0         0         0         0    
+// CE#          0         0         1         1         1         1         1         1    
 // WE#          1         1         1         1         1         1         1         1    
 // OE#          0         0         1         1         1         1         1         1    
 // CTL3         0         0         0         0         0         0         0         0    
@@ -84,7 +84,7 @@
 // Branch0                      ElseIdle                                                   
 // Re-Exec                      No                                                         
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
-// CE#          0         0         0         0         0         0         0         0    
+// CE#          0         0         1         1         1         1         1         1    
 // WE#          0         1         1         1         1         1         1         1    
 // OE#          1         1         1         1         1         1         1         1    
 // CTL3         0         0         0         0         0         0         0         0    
@@ -111,7 +111,7 @@
 // Branch0                                ElseIdle                                         
 // Re-Exec                                No                                               
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
-// CE#          0         0         0         0         0         0         0         0    
+// CE#          1         1         1         1         1         1         1         1    
 // WE#          1         1         1         1         1         1         1         1    
 // OE#          0         0         1         1         1         1         1         1    
 // CTL3         0         0         0         0         0         0         0         0    
@@ -121,29 +121,29 @@
 // END DO NOT EDIT     
 // DO NOT EDIT ...                                                                         
 //                                                                                         
-// GPIF Waveform 3: Unused                                                                  
+// GPIF Waveform 3: Write Da                                                                
 //                                                                                         
 // Interval     0         1         2         3         4         5         6     Idle (7) 
 //          _________ _________ _________ _________ _________ _________ _________ _________
 //                                                                                         
-// AddrMode Same Val  Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
-// DataMode NO Data   NO Data   NO Data   NO Data   NO Data   NO Data   NO Data            
-// NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
+// AddrMode Inc Val   Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
+// DataMode Activate  Activate  NO Data   NO Data   NO Data   NO Data   NO Data            
+// NextData NextData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1    Wait 1             
-//   Term A                                                                                
-//   LFunc                                                                                 
-//   Term B                                                                                
-// Branch1                                                                                 
-// Branch0                                                                                 
-// Re-Exec                                                                                 
+// IF/Wait  Wait 1    Wait 5    Wait 1    IF        Wait 1    Wait 1    Wait 1             
+//   Term A                               IntReady                                         
+//   LFunc                                AND                                              
+//   Term B                               IntReady                                         
+// Branch1                                ThenIdle                                         
+// Branch0                                ElseIdle                                         
+// Re-Exec                                No                                               
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
-// CE#          0         0         0         0         0         0         0         0    
-// WE#          1         1         1         1         1         1         1         1    
+// CE#          1         1         1         1         1         1         1         1    
+// WE#          1         0         1         1         1         1         1         1    
 // OE#          1         1         1         1         1         1         1         1    
 // CTL3         0         0         0         0         0         0         0         0    
 // CTL4         0         0         0         0         0         0         0         0    
-// DIR          0         0         0         0         0         0         0         0    
+// DIR          1         1         1         0         0         0         0         0    
 //                     
 // END DO NOT EDIT     
                                               
@@ -161,23 +161,23 @@ const char xdata WaveData[128] =
 // Wave 0 
 /* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
+/* Output*/ 0x02,     0x02,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 1 
 /* LenBr */ 0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
+/* Output*/ 0x24,     0x26,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 2 
 /* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
+/* Output*/ 0x03,     0x03,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
 // Wave 3 
-/* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x06,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
-/* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
+/* LenBr */ 0x01,     0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x0E,     0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x27,     0x25,     0x27,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
 };                     
 // END DO NOT EDIT     
                        
@@ -194,7 +194,7 @@ const char xdata FlowStates[36] =
 // DO NOT EDIT ...                                               
 const char xdata InitData[7] =                                   
 {                                                                
-/* Regs  */ 0xC0,0x00,0x00,0x06,0xEA,0x4E,0x00     
+/* Regs  */ 0xC0,0x00,0x00,0x07,0xEA,0x4E,0x00     
 };                                                               
 // END DO NOT EDIT                                               
                                                                  

@@ -23,37 +23,42 @@
 
 
 // Vendor USB Commands
-typedef enum{                  // wValue         wIndex          IN/OUT data
-  CMD_LED=0x10,                // 0=off 1=on     0=green 1=red   ---
-  CMD_VERSION=0x11,            // ---            ---             FW version
+typedef enum{                 // wValue         wIndex          IN/OUT data
+  CMD_LED=0x10,               // 0=off 1=on     0=green 1=red   ---
+  CMD_VERSION=0x11,           // ---            ---             FW version
 
 
-  CMD_FPGA_START_CONFIG=0x20,  // ---            ---             ---(data via EP1)
-  CMD_FPGA_WRITE_REG=0x21,     // reg value      reg addr        ---
-  CMD_FPGA_WRITE_REGS=0x22,    // ---            ---             ---(data via EP1)
+  CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---(data via EP1)
+  CMD_FPGA_WRITE_REG=0x21,    // reg value      reg addr        ---
+  CMD_FPGA_WRITE_REGS=0x22,   // ---            ---             ---(data via EP1)
 
 
-  CMD_DRIVER_ENABLE=0x30,      // 0xA5=en.       ---             ---
-                               // else dis.
-  CMD_DRIVER_READ_ID=0x31,     // ---            ---             driver id
-  CMD_DRIVER_CONFIG=0x32,      // ---            ---             data
+  CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
+                              // else dis.
+  CMD_DRIVER_READ_ID=0x31,    // ---            ---             driver id
+  CMD_DRIVER_CONFIG=0x32,     // ---            ---             data
 
 
-  CMD_PWR_SET_DAC=0x40,        // raw value      LSB: DAC channel, ---
-                               //                MSB = 0: DAC EEPROM unaffected
-                               //                MSB = 1: store value in DAC EEPROM
-  CMD_PWR_SET_VOLTAGE=0x41,    // voltage(LSB),  0=VPP 1=VCC     ---
-                               // slew rate(MSB)
-  CMD_PWR_SET_CURRENT=0x42,    // value          0=IPP 1=ICC     ---
-  CMD_PWR_SWITCH=0x43,         // 0=off 1=on     ---             ---
-  CMD_PWR_RESET=0x44,          // ---            ---             ---
+  CMD_PWR_SET_DAC=0x40,       // raw value      LSB: DAC channel, ---
+                              //                MSB = 0: DAC EEPROM unaffected
+                              //                MSB = 1: store value in DAC EEPROM
+  CMD_PWR_SET_VOLTAGE=0x41,   // voltage(LSB),  0=VPP 1=VCC     ---
+                              // slew rate(MSB)
+  CMD_PWR_SET_CURRENT=0x42,   // value          0=IPP 1=ICC     ---
+  CMD_PWR_SWITCH=0x43,        // 0=off 1=on     ---             ---
+  CMD_PWR_RESET=0x44,         // ---            ---             ---
 
 
-  CMD_EEPROM_READ=0x50,        // length         addr            data
-  CMD_EEPROM_WRITE=0x51,       // ---            addr            data
+  CMD_EEPROM_READ=0x50,       // length         addr            data
+  CMD_EEPROM_WRITE=0x51,      // ---            addr            data
   
   
-  CMD_IFC_SET_CONFIG=0x60      // ---            config_type     data
+  CMD_IFC_SET_CONFIG=0x60,    // param          config_type     data
+  CMD_IFC_READ_ID=0x61,       // size           ---             id
+  CMD_IFC_ERASE_CHIP=0x62,    // ---            ---             ---
+  CMD_IFC_READ_DATA=0x63,     // ---            ---             ---(data via EP6)
+  CMD_IFC_WRITE_DATA=0x64,    // ---            ---             ---(data via EP2)
+  CMD_IFC_ABORT=0x6F          // ---            ---             ---
 }VENDOR_CMD;
 
 
@@ -94,17 +99,12 @@ typedef struct{
   BYTE dcok;
   BYTE ocprot;
   BYTE fpga;
+  BYTE ifc_busy;
   WORD data_cnt;
 }DEVICE_STATUS;
 
 
 // Memory Interface
-typedef enum{
-  IFC_STATUS_IDLE=0,
-  IFC_STATUS_READING,
-  IFC_STATUS_WRITING
-}IFC_STATUS;
-
 typedef enum{
   IFC_CFG_ADDRESS_MAPPING
 }IFC_CFG_TYPE;

@@ -22,58 +22,112 @@
 #include <fx2regs.h>
 #include <fx2types.h>
 
+#include "../fpga.h"
+#include "module.h"
 
-#define CMD_READ_ID 0x90
 
 #define SYNCDELAY SYNCDELAY3
-                
-const __code BYTE wave_data[96] =
-{
-// Wave 0
-/* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
-/* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 1
-/* LenBr */ 0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
-/* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 2
-/* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
-/* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
+
+
+enum MEMORY_CMD{
+  CMD_AUTO_ERASE_CHIP=0x30,
+  CMD_READ_ID=0x90,
+  CMD_RESET=0xFF
 };
 
-__xdata BYTE addr_map[20-8];
+enum IFC_STATE{
+  STATE_IDLE,
+  STATE_ERASE,
+  STATE_READ_DATA,
+  STATE_WRITE_DATA
+}state;
+                
+const __code BYTE wave_data[128] =
+{
+// Wave 0 
+/* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x02,     0x02,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
+// Wave 1 
+/* LenBr */ 0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x24,     0x26,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
+// Wave 2 
+/* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x03,     0x03,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
+// Wave 3 
+/* LenBr */ 0x01,     0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x0E,     0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x27,     0x25,     0x27,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F
+};
+
+__xdata BYTE hiaddr_map[16];
+__xdata BYTE hiaddr_size;
+__xdata WORD hiaddr;
 
 
-void ifc_reset(void)
+
+// Private Functions ---------------------------------------------------
+
+void update_hiaddr(void)
 {
   BYTE i;
-  
-  GPIFABORT = 0xFF;  // abort any waveforms pending
-  
-  // GPIF address pins update when GPIFADRH/L written
-  GPIFADRH = 0x00;    // bits[7:1] always 0
-  SYNCDELAY;
-  GPIFADRL = 0x00;    // point to PERIPHERAL address 0x0000
+  register WORD tmp = hiaddr;
+  __bit lb;
   
   __asm
-    mov	_AUTOPTRH1,(#_addr_map >> 8)
-    mov	_AUTOPTRL1,#_addr_map
+    mov	_AUTOPTRH1,(#_hiaddr_map >> 8)
+    mov	_AUTOPTRL1,#_hiaddr_map
   __endasm;
-  for(i = 0x00; i < sizeof(addr_map); i++){
-    fpga_regs.reg[XAUTODAT1] = 0x1E;    // 0x1E = low level on pin
+  for(i = 0x00; i < hiaddr_size; i++){
+    lb = ((BYTE)hiaddr)&0x01;
+    fpga_regs.reg[XAUTODAT1] = 0x1E | lb;
+    hiaddr >>= 1;
   }
 }
 
+/*
+BOOL poll_dq7(void)
+{
+  __bit actual_dq7;
+  
+  actual_dq7 = XGPIFSGLDATLX;   // trigger read sequence
+  while(!(GPIFTRIG & bmDONE))
+    ;
+  actual_dq7 = XGPIFSGLDATLNOX & 0x80;
+  
+  return !(actual_dq7 ^ expected_dq7)
+}
+*/
+
+BOOL poll_dq6(void)
+{
+  BYTE dq6, next_dq6;
+  
+  dq6 = XGPIFSGLDATLX;   // trigger read sequence
+  while(!(GPIFTRIG & bmDONE))
+    ;
+  dq6 = XGPIFSGLDATLX & 0x40;
+  while(!(GPIFTRIG & bmDONE))
+    ;
+  next_dq6 = XGPIFSGLDATLNOX & 0x40;
+  
+  return !(dq6 ^ next_dq6);
+}
+
+
+// Public Functions ----------------------------------------------------
 
 void ifc_init(void)
 {
   BYTE i;
   
+  // GPIF config
   IFCONFIG = bmIFCLKSRC|bm3048MHZ   // IFCLK = Internal 48MHz
              |bmIFGPIF;             // ports in GPIF master mode
 
@@ -87,7 +141,13 @@ void ifc_init(void)
   GPIFREADYSTAT = 0x00;
   GPIFHOLDAMOUNT = 0x01;  // 1/2 IFCLK hold time
   
-  // source
+  // Configure endpoints FIFOs
+  EP2FIFOCFG = bmAUTOOUT;
+  SYNCDELAY;
+  EP6FIFOCFG = bmAUTOIN;
+  // AUTOIN/OUT packet length is set to default size 512B after reset
+  
+  // Load WaveData
   __asm
     ; source
     mov	_AUTOPTRH1,(#_wave_data >> 8)
@@ -98,7 +158,7 @@ void ifc_init(void)
   __endasm;
   
   // transfer
-  for(i = 0x00; i < 96; i++){
+  for(i = 0x00; i < 128; i++){
     XAUTODAT2 = XAUTODAT1;
   }
   
@@ -111,12 +171,12 @@ void ifc_init(void)
   // Don't use flowstates
   FLOWSTATE = 0x00;
   
-  ifc_reset();
+  ifc_abort();
 }
 
 
 // Data pointed by the autopointer 1
-BOOL ifc_set_config(IFC_CFG_TYPE type)
+BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param)
 {
   BYTE i;
   
@@ -124,28 +184,35 @@ BOOL ifc_set_config(IFC_CFG_TYPE type)
     case IFC_CFG_ADDRESS_MAPPING:
       __asm
         ; destination
-        mov	_AUTOPTRH2,(#_addr_map >> 8)
-        mov	_AUTOPTRL2,#_addr_map
+        mov	_AUTOPTRH2,(#_hiaddr_map >> 8)
+        mov	_AUTOPTRL2,#_hiaddr_map
       __endasm;
-      for(i = 0x00; i < sizeof(addr_map); i++){
+      for(i = 0x00; i < param; i++){
         XAUTODAT2 = XAUTODAT1;
       }
+      hiaddr_size = param;
       break;
   }
+  
+  return TRUE;
 }
 
 
-BOOL ifc_read_id(BYTE *id)
+BOOL ifc_read_id(BYTE size, BYTE *id)
 {
   BYTE dummy;
   
-  GPIFIDLECTL = 0x06;   // enable CE#
+  size;
+  
+  if(state != STATE_IDLE){
+    return FALSE;
+  }
   
   XGPIFSGLDATLX = CMD_READ_ID;
   while(!(GPIFTRIG & bmDONE))
     ;
   
-  dummy = XGPIFSGLDATLX;
+  dummy = XGPIFSGLDATLX;  // trigger read sequence
   while(!(GPIFTRIG & bmDONE))
     ;
   id[0] = XGPIFSGLDATLX;
@@ -156,6 +223,157 @@ BOOL ifc_read_id(BYTE *id)
     ;
   id[1] = XGPIFSGLDATLNOX;
   
-  GPIFIDLECTL = 0x07;   // disable CE#
+  ifc_abort();
+  
+  return TRUE;
 }
- 
+
+
+BOOL ifc_erase_chip(void)
+{
+  if(state != STATE_IDLE){
+    return FALSE;
+  }
+  
+  XGPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
+  while(!(GPIFTRIG & bmDONE))
+    ;
+  XGPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
+  while(!(GPIFTRIG & bmDONE))
+    ;
+  
+  state = STATE_ERASE;
+  
+  return TRUE;
+}
+
+
+BOOL ifc_prepare_read(void)
+{
+  if(state != STATE_IDLE){
+    return FALSE;
+  }
+  
+  EP6CS = 0x00;             // Unstall IN endpoint
+  
+  GPIFTCB1 = 0x01;          // Transaction Counter = 512B
+  SYNCDELAY;
+  GPIFTCB0 = 0xFF;
+  
+  GPIFIDLECTL = 0x06;       // enable CE#
+  
+  GPIFTRIG = bmBIT2 | 0x6;  // trigger FIFO read transaction on EP6
+  
+  state = STATE_READ_DATA;
+  
+  return TRUE;
+}
+
+
+BOOL ifc_prepare_write(void)
+{
+  if(state != STATE_IDLE){
+    return FALSE;
+  }
+  
+  EP2CS = 0x00;             // Unstall OUT endpoint
+  
+  GPIFIDLECTL = 0x06;       // enable CE#
+  
+  // Starting from addr 0x1FF, because the address will be incremented
+  // at the beggining of the waveform
+  SYNCDELAY;
+  GPIFADRH = 0x01;
+  SYNCDELAY;
+  GPIFADRL = 0xFF;
+  
+  GPIFTRIG = 0x2;           // trigger FIFO write transaction on EP2
+  
+  state = STATE_WRITE_DATA;
+  
+  return TRUE;
+}
+
+
+BOOL ifc_busy(void)
+{
+  return (state != STATE_IDLE);
+}
+
+
+WORD ifc_get_data_count(void)
+{
+  return hiaddr;
+}
+
+
+void ifc_abort(void)
+{
+  GPIFABORT = 0xFF;   // abort any waveforms pending
+  GPIFIDLECTL = 0x07; // reset control signals
+  
+  // Reset memory command
+  XGPIFSGLDATLX = CMD_RESET;
+  while(!(GPIFTRIG & bmDONE))
+    ;
+  XGPIFSGLDATLX = CMD_RESET;
+  while(!(GPIFTRIG & bmDONE))
+    ;
+  
+  // Reset GPIF address
+  SYNCDELAY;
+  GPIFADRH = 0x00;
+  SYNCDELAY;
+  GPIFADRL = 0x00;
+  
+  // Reset high bits of the address
+  hiaddr = 0x0000;
+  update_hiaddr();
+  
+  // Reset Transaction Counter
+  GPIFTCB0 = 0x00;
+  SYNCDELAY;
+  GPIFTCB1 = 0x00;
+  
+  // Stall endpoints
+  EP2CS = bmEPSTALL;
+  EP6CS = bmEPSTALL;
+  
+  state = STATE_IDLE;
+}
+
+
+void ifc_process(void)
+{
+  switch(state){
+    case STATE_IDLE:
+      return;
+      
+    case STATE_ERASE:
+      if(poll_dq6()){    // Erase completed
+        state = STATE_IDLE;
+      }
+      break;
+    
+    case STATE_READ_DATA:
+      if(GPIFTRIG & bmDONE){
+        hiaddr++;
+        update_hiaddr();
+        GPIFTCB1 = 0x01;  // Transaction Counter = 512B
+        SYNCDELAY;
+        GPIFTCB0 = 0xFF;
+        GPIFTRIG = bmBIT2 | 0x6; // trigger next transaction
+      }
+      break;
+    
+    case STATE_WRITE_DATA:
+      if(GPIFTRIG & bmDONE){
+        if((GPIFADRH == 0x01) && (GPIFADRL == 0xFF)){
+          hiaddr++;
+          update_hiaddr();
+        }
+        GPIFTRIG = 0x2;   // trigger next transaction
+      }
+      break;
+  }
+}

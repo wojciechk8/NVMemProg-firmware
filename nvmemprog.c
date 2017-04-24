@@ -122,8 +122,7 @@ BOOL handle_vendorcommand(BYTE cmd)
     case CMD_VERSION:
       EP0BUF[0] = LSB(FW_VERSION);
       EP0BUF[1] = MSB(FW_VERSION);
-      EP0BCH=0;
-      EP0BCL=2;
+      EP0BCL = 2;
       break;
 
     case CMD_FPGA_START_CONFIG:
@@ -162,7 +161,6 @@ BOOL handle_vendorcommand(BYTE cmd)
       if(!driver_read_id(EP0BUF)){
         STALLEP0();
       }
-      EP0BCH=0;
       EP0BCL=1;
       break;
 
@@ -221,7 +219,6 @@ BOOL handle_vendorcommand(BYTE cmd)
 
     case CMD_EEPROM_READ:
       if(eeprom_read(EEPROM_ADDR, SETUP_INDEX(), SETUPDAT[2], EP0BUF)){
-        EP0BCH = 0;
         EP0BCL = SETUPDAT[2];
       }else{
         STALLEP0();
@@ -235,6 +232,50 @@ BOOL handle_vendorcommand(BYTE cmd)
       if(!eeprom_write(EEPROM_ADDR, SETUP_INDEX(), EP0BCL, EP0BUF)){
         STALLEP0();
       }
+      break;
+    
+    case CMD_IFC_SET_CONFIG:
+      EP0BCL = 0;               // arm EP0
+      while (EP0CS & bmEPBUSY)  // wait for OUT data
+        ;
+      __asm
+        ; source
+        mov	_AUTOPTRH1,(#_EP0BUF >> 8)
+        mov	_AUTOPTRL1,#_EP0BUF
+      __endasm;
+      if(!ifc_set_config(SETUPDAT[4], SETUPDAT[2])){
+        STALLEP0();
+      }
+      break;
+    
+    case CMD_IFC_READ_ID:
+      if(ifc_read_id(SETUPDAT[2], EP0BUF)){
+        EP0BCL = SETUPDAT[2];
+      }else{
+        STALLEP0();
+      }
+      break;
+    
+    case CMD_IFC_ERASE_CHIP:
+      if(!ifc_erase_chip()){
+        STALLEP0();
+      }
+      break;
+    
+    case CMD_IFC_READ_DATA:
+      if(!ifc_prepare_read()){
+        STALLEP0();
+      }
+      break;
+    
+    case CMD_IFC_WRITE_DATA:
+      if(!ifc_prepare_write()){
+        STALLEP0();
+      }
+      break;
+    
+    case CMD_IFC_ABORT:
+      ifc_abort();
       break;
   }
   return TRUE;
@@ -294,6 +335,7 @@ void handle_ep1out(void)
 void handle_ep1in(void)
 {
   static __bit sw_last=FALSE;
+  WORD data_cnt;
 
   __asm
     mov	_AUTOPTRH2,(#_EP1INBUF >> 8)
@@ -328,7 +370,10 @@ void handle_ep1in(void)
   __endasm;
   
   XAUTODAT2 = fpga_get_status();
-  //XAUTODAT2 = ifc_get_data_count();
+  XAUTODAT2 = ifc_busy();
+  data_cnt = ifc_get_data_count();
+  XAUTODAT2 = LSB(data_cnt);
+  XAUTODAT2 = MSB(data_cnt);
   
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
 
@@ -348,7 +393,7 @@ void handle_ocprot(void)
 
 //******************************* INIT *********************************
 
-void main_init(void)
+void device_init(void)
 {
   SETCPUFREQ(CLK_48M);
   SYNCDELAY;
@@ -376,11 +421,3 @@ void main_init(void)
   
   handle_ep1in();
 }
-
-
-void main_loop(void)
-{
-
-}
-
-

@@ -23,13 +23,14 @@
 #include <delay.h>
 #include <setupdat.h>
 
+#include "ifc_mod/module.h"
+
 
 volatile __bit dosud=FALSE;
 volatile __bit doep1out=FALSE;
 
 // custom functions
-extern void main_loop(void);
-extern void main_init(void);
+extern void device_init(void);
 extern void handle_ep1out(void);
 extern void handle_ep1in(void);
 extern void handle_ocprot(void);
@@ -74,7 +75,8 @@ void ie1_isr() __interrupt IE1_ISR
 void main()
 {
 
-  main_init();
+  device_init();
+  ifc_init();
 
   // set up interrupts.
   USE_USB_INTS();
@@ -98,7 +100,7 @@ void main()
   #endif
 
   while(TRUE){
-    main_loop();
+    ifc_process();
 
     if(dosud){
       dosud=FALSE;
