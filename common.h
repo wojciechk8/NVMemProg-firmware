@@ -47,6 +47,7 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_PWR_SET_CURRENT=0x42,   // value          0=IPP 1=ICC     ---
   CMD_PWR_SWITCH=0x43,        // 0=off 1=on     ---             ---
   CMD_PWR_RESET=0x44,         // ---            ---             ---
+  CMD_PWR_SW_STATE=0x4F,      // ---            ---             pwr_sw state
 
 
   CMD_EEPROM_READ=0x50,       // length         addr            data

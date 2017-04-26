@@ -216,6 +216,11 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
+    
+    case CMD_PWR_SW_STATE:
+      EP0BUF[0] = GPIO_PWRSW_STATE();
+      EP0BCL = 1;
+      break;
 
     case CMD_EEPROM_READ:
       if(eeprom_read(EEPROM_ADDR, SETUP_INDEX(), SETUPDAT[2], EP0BUF)){
