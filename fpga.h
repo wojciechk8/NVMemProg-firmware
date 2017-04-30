@@ -72,13 +72,7 @@ inline void fpga_init(void)
 }
 
 
-BOOL fpga_start_config();
+BOOL fpga_start_config(void);
 BOOL fpga_write_config(BYTE len); // Data pointed by the autopointer 1
-FPGA_CFG_STATUS fpga_get_status();
-
-
-inline void fpga_reset_regs()
-{
-  fpga_regs.reset = 0xFF;
-}
-
+FPGA_CFG_STATUS fpga_get_status(void);
+void fpga_reset_regs(void);

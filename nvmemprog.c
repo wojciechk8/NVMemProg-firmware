@@ -391,6 +391,10 @@ void handle_ep1in(void)
 
 void handle_ocprot(void)
 {
+  fpga_reset_regs();
+  pwr_reset();
+  driver_disable();
+  ifc_abort();
   GPIO_LEDR_ON();
   ocprot = 1;
 }

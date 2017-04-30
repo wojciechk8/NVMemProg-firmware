@@ -79,7 +79,13 @@ BOOL fpga_write_config(BYTE len)
 }
 
 
-FPGA_CFG_STATUS fpga_get_status()
+FPGA_CFG_STATUS fpga_get_status(void)
 {
   return status;
 }
+
+void fpga_reset_regs(void)
+{
+  fpga_regs.reset = 0xFF;
+}
+
