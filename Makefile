@@ -111,6 +111,7 @@ clean:
 	$(RM) $(IHX) $(BIX) $(IIC) $(MEM) $(MAP) $(LK) \
 $(OBJ) $(LST) $(RST) $(SYM) $(ASM) $(DEPENDS) \
 $(IFCMODOBJ) $(IFCMODLST) $(IFCMODRST) $(IFCMODSYM) $(IFCMODASM)
+	$(RM) -d $(BINDIR) $(OBJDIR) $(IFCMODDIR)/$(OBJDIR)
 
 
 # implicit rules
@@ -129,6 +130,7 @@ $(IFCMODDIR)/$(OBJDIR)/%.rel: $(IFCMODDIR)/%.c
 
 $(BINDIR)/$(TARGET)_%.ihx: $(IFCMODDIR)/$(OBJDIR)/%.rel $(OBJ)
 	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJ) $< -o $@
+	$(RM) $(MAP) $(LK)
 
 $(BINDIR)/$(TARGET)_%.bix: $(BINDIR)/$(TARGET)_%.ihx
 	$(OBJCOPY) -I ihex -O binary $< $@
