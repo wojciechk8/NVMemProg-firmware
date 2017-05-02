@@ -43,9 +43,7 @@
 enum{
   EP1STATE_NOTHING,
   EP1STATE_FPGA_CONFIG,
-  EP1STATE_FPGA_REGS,
-  EP1STATE_DRIVER_CONFIG,
-  EP1STATE_IFC_CONFIG
+  EP1STATE_FPGA_REGS
 }ep1state = EP1STATE_NOTHING;
 
 volatile __bit ocprot=FALSE;
@@ -295,44 +293,37 @@ void handle_ep1out(void)
   BYTE i;
 
   switch(ep1state){
+    case EP1STATE_NOTHING:
+      break;
+      
     case EP1STATE_FPGA_CONFIG:
       __asm
         ; source
         mov	_AUTOPTRH1,(#_EP1OUTBUF >> 8)
         mov	_AUTOPTRL1,#_EP1OUTBUF
       __endasm;
-      if(!fpga_write_config(EP1OUTBC)){
-        EP1OUTCS |= bmEPSTALL;
-      }
-      if(fpga_get_status() == FPGA_STATUS_CONFIGURED){
-        ep1state = EP1STATE_NOTHING;
-      }else{
+      fpga_write_config(EP1OUTBC);
+      if(fpga_get_status() == FPGA_STATUS_CONFIGURING){
         EP1OUTBC = 0; // arm EP for further data
       }
       break;
 
     case EP1STATE_FPGA_REGS:
-      if(EP1OUTBC <= FPGA_REG_NUM){
-        __asm
-          ; source
-          mov	_AUTOPTRH1,(#_EP1OUTBUF >> 8)
-          mov	_AUTOPTRL1,#_EP1OUTBUF
-          ; destination
-          mov	_AUTOPTRH2,(#_fpga_regs >> 8)
-          mov	_AUTOPTRL2,#_fpga_regs
-        __endasm;
-        // transfer
-        for (i = 0x00; i < EP1OUTBC; i++){
-          XAUTODAT2 = XAUTODAT1;
-        }
-      }else{
-        EP1OUTCS |= bmEPSTALL;
+      __asm
+        ; source
+        mov	_AUTOPTRH1,(#_EP1OUTBUF >> 8)
+        mov	_AUTOPTRL1,#_EP1OUTBUF
+        ; destination
+        mov	_AUTOPTRH2,(#_fpga_regs >> 8)
+        mov	_AUTOPTRL2,#_fpga_regs
+      __endasm;
+      // transfer
+      for (i = 0x00; i < EP1OUTBC; i++){
+        XAUTODAT2 = XAUTODAT1;
       }
+
       ep1state = EP1STATE_NOTHING;
       break;
-
-    default:
-      EP1OUTCS |= bmEPSTALL;
   }
 }
 
