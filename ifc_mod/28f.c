@@ -254,14 +254,20 @@ BOOL ifc_prepare_read(void)
     return FALSE;
   }
   
-  EP6CS = 0x00;             // Unstall IN endpoint
+  FIFORESET = bmNAKALL|6;   // reset EP6 FIFO
+  SYNCDELAY;
+  FIFORESET = 0x00;
+  SYNCDELAY;
+  EP6FIFOCFG = bmAUTOIN;    // switch to auto mode
   
+  SYNCDELAY;
   GPIFTCB1 = 0x01;          // Transaction Counter = 512B
   SYNCDELAY;
   GPIFTCB0 = 0xFF;
   
   GPIFIDLECTL = 0x06;       // enable CE#
   
+  SYNCDELAY;
   GPIFTRIG = bmBIT2 | 0x6;  // trigger FIFO read transaction on EP6
   
   state = STATE_READ_DATA;
@@ -276,7 +282,11 @@ BOOL ifc_prepare_write(void)
     return FALSE;
   }
   
-  EP2CS = 0x00;             // Unstall OUT endpoint
+  FIFORESET = bmNAKALL|2;   // reset EP2 FIFO
+  SYNCDELAY;
+  FIFORESET = 0x00;
+  SYNCDELAY;
+  EP2FIFOCFG = bmAUTOOUT;   // switch to auto mode
   
   GPIFIDLECTL = 0x06;       // enable CE#
   
@@ -287,6 +297,7 @@ BOOL ifc_prepare_write(void)
   SYNCDELAY;
   GPIFADRL = 0xFF;
   
+  SYNCDELAY;
   GPIFTRIG = 0x2;           // trigger FIFO write transaction on EP2
   
   state = STATE_WRITE_DATA;
@@ -335,9 +346,13 @@ void ifc_abort(void)
   SYNCDELAY;
   GPIFTCB1 = 0x00;
   
-  // Stall endpoints
-  EP2CS = bmEPSTALL;
-  EP6CS = bmEPSTALL;
+  // Switch FIFOs to manual mode and NAK all transfers
+  SYNCDELAY;
+  EP2FIFOCFG = 0x00;
+  SYNCDELAY;
+  EP6FIFOCFG = 0x00;
+  SYNCDELAY;
+  FIFORESET = bmNAKALL;
   
   state = STATE_IDLE;
 }
@@ -350,7 +365,7 @@ void ifc_process(void)
       return;
       
     case STATE_ERASE:
-      if(poll_dq6()){    // Erase completed
+      if(poll_dq6()){     // Erase completed
         state = STATE_IDLE;
       }
       break;
@@ -362,7 +377,8 @@ void ifc_process(void)
         GPIFTCB1 = 0x01;  // Transaction Counter = 512B
         SYNCDELAY;
         GPIFTCB0 = 0xFF;
-        GPIFTRIG = bmBIT2 | 0x6; // trigger next transaction
+        SYNCDELAY;
+        GPIFTRIG = bmBIT2 | 0x6; // trigger next transaction (read)
       }
       break;
     
