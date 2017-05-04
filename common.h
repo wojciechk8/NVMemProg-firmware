@@ -21,6 +21,10 @@
 
 #pragma once
 
+#ifndef SDCC
+  typedef unsigned char BYTE;
+  typedef unsigned short WORD;
+#endif
 
 // Vendor USB Commands
 typedef enum{                 // wValue         wIndex          IN/OUT data
