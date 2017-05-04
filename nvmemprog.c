@@ -404,8 +404,9 @@ void device_init(void)
   gpio_init();
   pwr_switch_off();
   driver_init();
+  fpga_reset_regs();
   pwr_init();
-
+  
   // Endpoints configuration
   EP1OUTCFG = bmVALID|bmTYPE1;        // BULK 64B
   SYNCDELAY;
