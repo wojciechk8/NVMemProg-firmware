@@ -41,19 +41,13 @@
  *
  * rdy_fx_mux (addr 48..49):
  *   0-47: mem_pin [0:47]
- * 
- * reset (addr >= 64):
- *   writing anything to this address will reset the OE bit of all
- *   memory pins
  */
 typedef union{
   struct{
     BYTE mem_mux[48];
     BYTE rdy_fx_mux[2];
-    BYTE reserved[14];
-    BYTE reset;
   };
-  BYTE reg[65];
+  BYTE reg[50];
 }FPGA_REGS;
 
 
@@ -75,4 +69,3 @@ inline void fpga_init(void)
 BOOL fpga_start_config(void);
 BOOL fpga_write_config(BYTE len); // Data pointed by the autopointer 1
 FPGA_CFG_STATUS fpga_get_status(void);
-void fpga_reset_regs(void);

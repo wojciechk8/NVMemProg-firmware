@@ -382,7 +382,6 @@ void handle_ep1in(void)
 
 void handle_ocprot(void)
 {
-  fpga_reset_regs();
   pwr_reset();
   driver_disable();
   ifc_abort();
@@ -404,7 +403,6 @@ void device_init(void)
   gpio_init();
   pwr_switch_off();
   driver_init();
-  fpga_reset_regs();
   pwr_init();
   
   // Endpoints configuration
