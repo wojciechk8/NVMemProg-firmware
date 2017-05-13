@@ -189,7 +189,8 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_PWR_SET_CURRENT:
-      if(!pwr_set_current(SETUPDAT[4]+2, SETUPDAT[2])){
+      if(!pwr_set_current(SETUPDAT[4]+(SETUPDAT[4]<2 ? 2 : 0),
+                          SETUPDAT[2])){
         STALLEP0();
       }
       break;
