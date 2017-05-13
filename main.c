@@ -84,6 +84,7 @@ void main()
   ENABLE_USBRESET();
   ENABLE_HISPEED();
   ENABLE_EP1OUT();
+  ENABLE_EP1IN();
   // OCPROT# external interrupt on falling edge
   EX1 = 1;
   IT1 = 1;
