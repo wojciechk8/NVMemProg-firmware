@@ -31,6 +31,10 @@ FX2LIBDIR:=/opt/fx2lib
 OBJDIR:=obj
 BINDIR:=bin
 
+# Target interface for programming (set it from command line)
+# ie. make program IFC=dummy
+IFC?=dummy
+
 
 
 # Internal variables names
@@ -97,7 +101,7 @@ iic: $(IIC)
 
 .PHONY: program
 program: $(IHX)
-	$(FX2PROG) -id=$(VID).$(PID) prg:$(BINDIR)/$(TARGET)_dummy.ihx
+	$(FX2PROG) -id=$(VID).$(PID) prg:$(BINDIR)/$(TARGET)_$(IFC).ihx
 	$(FX2PROG) -id=$(VID).$(PID) run
 	$(SIZE) $(IHX)
 
