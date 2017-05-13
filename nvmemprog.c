@@ -168,7 +168,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         ;
       __asm
         ; source
-        mov	_AUTOPTRH1,(#_EP0BUF >> 8)
+        mov	_AUTOPTRH1,#(_EP0BUF >> 8)
         mov	_AUTOPTRL1,#_EP0BUF
       __endasm;
       if(!driver_write_config(EP0BCL)){
@@ -243,7 +243,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         ;
       __asm
         ; source
-        mov	_AUTOPTRH1,(#_EP0BUF >> 8)
+        mov	_AUTOPTRH1,#(_EP0BUF >> 8)
         mov	_AUTOPTRL1,#_EP0BUF
       __endasm;
       if(!ifc_set_config(SETUPDAT[4], SETUPDAT[2])){
@@ -299,7 +299,7 @@ void handle_ep1out(void)
     case EP1STATE_FPGA_CONFIG:
       __asm
         ; source
-        mov	_AUTOPTRH1,(#_EP1OUTBUF >> 8)
+        mov	_AUTOPTRH1,#(_EP1OUTBUF >> 8)
         mov	_AUTOPTRL1,#_EP1OUTBUF
       __endasm;
       fpga_write_config(EP1OUTBC);
@@ -311,10 +311,10 @@ void handle_ep1out(void)
     case EP1STATE_FPGA_REGS:
       __asm
         ; source
-        mov	_AUTOPTRH1,(#_EP1OUTBUF >> 8)
+        mov	_AUTOPTRH1,#(_EP1OUTBUF >> 8)
         mov	_AUTOPTRL1,#_EP1OUTBUF
         ; destination
-        mov	_AUTOPTRH2,(#_fpga_regs >> 8)
+        mov	_AUTOPTRH2,#(_fpga_regs >> 8)
         mov	_AUTOPTRL2,#_fpga_regs
       __endasm;
       // transfer
@@ -334,7 +334,7 @@ void handle_ep1in(void)
   WORD data_cnt;
 
   __asm
-    mov	_AUTOPTRH2,(#_EP1INBUF >> 8)
+    mov	_AUTOPTRH2,#(_EP1INBUF >> 8)
     mov	_AUTOPTRL2,#_EP1INBUF
     mov	dptr,#_XAUTODAT2
   __endasm;
