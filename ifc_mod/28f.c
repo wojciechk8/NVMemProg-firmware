@@ -44,26 +44,26 @@ enum IFC_STATE{
 
 const __code BYTE wave_data[128] =
 {
-// Wave 0
+// Wave 0 
 /* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x02,     0x02,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* Output*/ 0x02,     0x02,     0x07,     0x07,     0x07,     0x07,     0x07,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 1
+// Wave 1 
 /* LenBr */ 0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x24,     0x26,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* Output*/ 0x24,     0x26,     0x07,     0x07,     0x07,     0x07,     0x07,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 2
+// Wave 2 
 /* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x03,     0x03,     0x07,     0x07,     0x07,     0x07,     0x07,     0x07,
+/* Opcode*/ 0x00,     0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
+/* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
-// Wave 3
+// Wave 3 
 /* LenBr */ 0x01,     0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x0E,     0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x27,     0x25,     0x27,     0x07,     0x07,     0x07,     0x07,     0x07,
-/* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F
+/* Output*/ 0x26,     0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,
+/* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
 };
 
 __xdata BYTE hiaddr_map[16];
@@ -97,7 +97,7 @@ BOOL poll_dq7(void)
   __bit actual_dq7;
 
   actual_dq7 = XGPIFSGLDATLX;   // trigger read sequence
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
   actual_dq7 = XGPIFSGLDATLNOX & 0x80;
 
@@ -110,10 +110,10 @@ BOOL poll_dq6(void)
   BYTE dq6, next_dq6;
 
   dq6 = GPIFSGLDATLX;   // trigger read sequence
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
   dq6 = GPIFSGLDATLX & 0x40;
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
   next_dq6 = GPIFSGLDATLNOX & 0x40;
 
@@ -209,17 +209,23 @@ BOOL ifc_read_id(BYTE size, BYTE *id)
   }
 
   GPIFSGLDATLX = CMD_READ_ID;
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
 
   dummy = GPIFSGLDATLX;  // trigger read sequence
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
-  id[0] = GPIFSGLDATLX;
+  id[0] = GPIFSGLDATLNOX;
+
 
   GPIFADRL = 0x01;
   SYNCDELAY;
-  while(!(GPIFTRIG & bmDONE))
+  GPIFSGLDATLX = CMD_READ_ID;
+  while(!(GPIFTRIG & bmBIT7))
+    ;
+
+  dummy = GPIFSGLDATLX;  // trigger read sequence
+  while(!(GPIFTRIG & bmBIT7))
     ;
   id[1] = GPIFSGLDATLNOX;
 
@@ -236,10 +242,10 @@ BOOL ifc_erase_chip(void)
   }
 
   GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
   GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
 
   state = STATE_ERASE;
@@ -337,10 +343,10 @@ void ifc_abort(void)
 
   // Reset memory command
   GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
   GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmDONE))
+  while(!(GPIFTRIG & bmBIT7))
     ;
 
   // Reset GPIF address
@@ -375,7 +381,7 @@ void ifc_process(void)
       break;
 
     case STATE_READ_DATA:
-      if(GPIFTRIG & bmDONE){
+      if(GPIFTRIG & bmBIT7){
         hiaddr++;
         update_hiaddr();
         GPIFTCB1 = 0x01;  // Transaction Counter = 512B
@@ -387,7 +393,7 @@ void ifc_process(void)
       break;
 
     case STATE_WRITE_DATA:
-      if(GPIFTRIG & bmDONE){
+      if(GPIFTRIG & bmBIT7){
         if((GPIFADRH == 0x01) && (GPIFADRL == 0xFF)){
           hiaddr++;
           update_hiaddr();
