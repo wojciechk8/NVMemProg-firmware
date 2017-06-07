@@ -45,22 +45,22 @@ enum IFC_STATE{
 
 const __code BYTE wave_data[128] =
 {
-// Wave 0 
+// Wave 0
 /* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x02,     0x05,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 1 
+// Wave 1
 /* LenBr */ 0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x02,     0x04,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 2 
+// Wave 2
 /* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x0A,     0x04,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
-// Wave 3 
+// Wave 3
 /* LenBr */ 0x01,     0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x0A,     0x02,     0x00,     0x05,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x26,     0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,
@@ -73,12 +73,14 @@ __xdata WORD hiaddr;
 
 
 
-// Private Functions ---------------------------------------------------
+//******************************************************************************
+// Private Functions
+//******************************************************************************
 
 void update_hiaddr(void)
 {
   BYTE i;
-  register WORD tmp = hiaddr;
+  WORD tmp = hiaddr;
   __bit lb;
 
   __asm
@@ -122,7 +124,9 @@ BOOL poll_dq6(void)
 }
 
 
-// Public Functions ----------------------------------------------------
+//******************************************************************************
+// Public Functions
+//******************************************************************************
 
 void ifc_init(void)
 {
@@ -132,7 +136,7 @@ void ifc_init(void)
   IFCONFIG = bmIFCLKSRC|bm3048MHZ   // IFCLK = Internal 48MHz
              |bmIFGPIF;             // ports in GPIF master mode
 
-  GPIFABORT = 0xFF;  // abort any waveforms pending
+  GPIFABORT = 0xFF;       // abort any waveforms pending
 
   GPIFREADYCFG = 0xC0;
   GPIFCTLCFG = 0x00;
@@ -151,8 +155,6 @@ void ifc_init(void)
     mov	_AUTOPTRH2,#0xE4
     mov	_AUTOPTRL2,#0x00
   __endasm;
-
-  // transfer
   for(i = 0x00; i < 128; i++){
     XAUTODAT2 = XAUTODAT1;
   }
@@ -213,8 +215,7 @@ BOOL ifc_read_id(BYTE size, BYTE *id)
   id[0] = GPIFSGLDATLNOX;
 
 
-  GPIFADRL = 0x01;
-  SYNCDELAY;
+  GPIFADRL = 0x01; SYNCDELAY;
   GPIFSGLDATLX = CMD_READ_ID;
   while(!(GPIFTRIG & bmBIT7))
     ;
@@ -255,23 +256,20 @@ BOOL ifc_prepare_read(void)
     return FALSE;
   }
 
-  SYNCDELAY;
-  GPIFTCB1 = 0x02;          // Transaction Counter = 512B
-  SYNCDELAY;
-  GPIFTCB0 = 0x00;
+  // Init Transaction Counter to 512B
+  GPIFTCB1 = 0x02;       SYNCDELAY;
+  GPIFTCB0 = 0x00;       SYNCDELAY;
 
-  GPIFIDLECTL = 0x06;       // enable CE#
+  // enable CE#
+  GPIFIDLECTL = 0x06;    SYNCDELAY;
 
   // Reset EP6 FIFO
-  SYNCDELAY;
-  FIFORESET = bmNAKALL;
-  SYNCDELAY;
-  FIFORESET = 6;            // reset EP6 FIFO
-  SYNCDELAY;
-  EP6FIFOCFG = bmAUTOIN;    // switch to auto mode
-  
-  SYNCDELAY;
-  GPIFTRIG = bmBIT2 | 0x2;  // trigger FIFO read transaction on EP6
+  FIFORESET = bmNAKALL;  SYNCDELAY;
+  FIFORESET = 0x06;      SYNCDELAY;
+  // Switch the FIFO to auto mode
+  EP6FIFOCFG = bmAUTOIN; SYNCDELAY;
+
+  GPIFTRIG = bmBIT2 | 0x2;
 
   state = STATE_READ_DATA;
 
@@ -285,32 +283,29 @@ BOOL ifc_prepare_write(void)
     return FALSE;
   }
 
-  GPIFIDLECTL = 0x06;       // enable CE#
-  
-  SYNCDELAY;
-  GPIFTCB1 = 0x00;          // Transaction Counter = 1B
-  SYNCDELAY;
-  GPIFTCB0 = 0x01;
+  // Init Transaction Counter
+  GPIFTCB1 = 0x00;       SYNCDELAY;
+  GPIFTCB0 = 0x01;       SYNCDELAY;
 
-  // Starting from addr 0x1FF, because the address will be incremented
+  // Starting from the highest address, because will be incremented
   // at the beggining of the waveform
-  SYNCDELAY;
-  GPIFADRH = 0x01;
-  SYNCDELAY;
+  GPIFADRH = 0x01;       SYNCDELAY;
   GPIFADRL = 0xFF;
-  hiaddr = 0xFFFF;          // same reason as above
+  hiaddr = 0xFFFF;
+  
+  // Enable CE#
+  GPIFIDLECTL = 0x06;    SYNCDELAY;
 
   // Reset EP2 FIFO
-  SYNCDELAY;
-  FIFORESET = bmNAKALL;
-  SYNCDELAY;
-  FIFORESET = 2;            // reset EP2 FIFO
-  SYNCDELAY;
-  OUTPKTEND = 0x82;         // arm both EP2 buffers
-  SYNCDELAY;
-  OUTPKTEND = 0x82;
-  SYNCDELAY;
-  EP2FIFOCFG = bmAUTOOUT;   // switch to auto mode
+  FIFORESET = bmNAKALL;  SYNCDELAY;
+  FIFORESET = 0x82;      SYNCDELAY;
+  FIFORESET = 0x00;      SYNCDELAY;
+  
+  // Arm both EP2 buffers
+  OUTPKTEND = 0x82;      SYNCDELAY;
+  OUTPKTEND = 0x82;      SYNCDELAY;
+  // Switch the FIFO to auto mode
+  EP2FIFOCFG = bmAUTOOUT;
 
   state = STATE_WRITE_DATA;
 
@@ -344,15 +339,13 @@ void ifc_abort(void)
     ;
 
   // Reset GPIF address
-  SYNCDELAY;
-  GPIFADRH = 0x00;
-  SYNCDELAY;
-  GPIFADRL = 0x00;
+  GPIFADRH = 0x00; SYNCDELAY;
+  GPIFADRL = 0x00; SYNCDELAY;
 
   // Reset high bits of the address
   hiaddr = 0x0000;
   update_hiaddr();
-  
+
   // Switch FIFOs to manual mode
   SYNCDELAY;
   FIFORESET = bmNAKALL;
@@ -381,38 +374,35 @@ void ifc_process(void)
 
     case STATE_READ_DATA:
       if(GPIFTRIG & bmBIT7){
+        GPIFTRIG = bmBIT2 | 0x2; // trigger next transaction (read)
         hiaddr++;
         update_hiaddr();
-        GPIFTCB1 = 0x02;  // Transaction Counter = 512B
-        SYNCDELAY;
+        // Reload Transaction Counter
+        GPIFTCB1 = 0x02; SYNCDELAY; 
         GPIFTCB0 = 0x00;
-        SYNCDELAY;
-        GPIFTRIG = bmBIT2 | 0x2; // trigger next transaction (read)
       }
       break;
 
     case STATE_WRITE_DATA:
       if(GPIFTRIG & bmBIT7){  // if GPIF done
-        if(EP24FIFOFLGS & bmBIT1){ // if EP2FIFO empty
+        if(EP24FIFOFLGS & bmBIT1) // if EP2FIFO empty
           break;
-        }
-        
-        if(!poll_dq6()){
+
+        if(!poll_dq6())
           break;
-        }
-      
+
         if((GPIFADRH == 0x01) && (GPIFADRL == 0xFF)){
           hiaddr++;
           update_hiaddr();
         }
-        
+
         GPIFSGLDATLX = CMD_AUTO_PROGRAM;  // program byte command
         while(!(GPIFTRIG & bmBIT7))
           ;
-        
+
         SYNCDELAY;
         GPIFTCB0 = 0x01;
-        
+
         SYNCDELAY;
         GPIFTRIG = 0x0;   // trigger EP2 write data transaction
         SYNCDELAY;

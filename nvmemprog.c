@@ -15,15 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * nvmemprog.c
- * 
+ *
  * Main code
  *
  */
 
-#include <i2c.h>
+#include <fx2macros.h>
+#include <fx2ints.h>
+#include <autovector.h>
 #include <setupdat.h>
 #include <eputils.h>
-#include <fx2macros.h>
+#include <i2c.h>
 #include <delay.h>
 
 #include "driver.h"
@@ -46,17 +48,20 @@ enum{
   EP1STATE_FPGA_REGS
 }ep1state = EP1STATE_NOTHING;
 
-volatile __bit ocprot=FALSE;
+volatile __bit ocprot = FALSE;
+
+volatile __bit dosud = FALSE;
+volatile __bit doep1out = FALSE;
 
 
+//******************************************************************************
+// CONFIGURATION HANDLERS
+//******************************************************************************
 
 BOOL handle_get_descriptor()
 {
   return FALSE;
 }
-
-
-//********************** CONFIGURATION HANDLERS ************************
 
 // change to support as many interfaces as you need
 //volatile xdata BYTE interface=0;
@@ -103,20 +108,21 @@ BOOL handle_set_configuration(BYTE cfg)
 }
 
 
-//********************* VENDOR COMMAND HANDLERS ************************
-
+//******************************************************************************
+// VENDOR COMMANDS HANDLER
+//******************************************************************************
 
 BOOL handle_vendorcommand(BYTE cmd)
 {
   switch((VENDOR_CMD)cmd){
     case CMD_LED:
-      if(SETUPDAT[4] == 0){ // wIndex
-        GPIO_LEDG = SETUPDAT[2]; // wValue
+      if(SETUPDAT[4] == 0){       // wIndex
+        GPIO_LEDG = SETUPDAT[2];  // wValue
       }else if(SETUPDAT[4] == 1){
         GPIO_LEDR = SETUPDAT[2];
       }
       break;
-    
+
     case CMD_VERSION:
       EP0BUF[0] = LSB(FW_VERSION);
       EP0BUF[1] = MSB(FW_VERSION);
@@ -181,7 +187,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
-    
+
     case CMD_PWR_SET_VOLTAGE:
       if(!pwr_ramp_voltage(SETUPDAT[4], SETUPDAT[2], SETUPDAT[3])){
         STALLEP0();
@@ -197,7 +203,7 @@ BOOL handle_vendorcommand(BYTE cmd)
 
     case CMD_PWR_SWITCH:
       if(SETUPDAT[2] == 0x00){
-        // Suppress OCPROT# interrupt when safely switching power off 
+        // Suppress OCPROT# interrupt when safely switching power off
         EX1 = 0;
         pwr_switch_off();
         delay_us(10);
@@ -215,7 +221,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
-    
+
     case CMD_PWR_SW_STATE:
       EP0BUF[0] = GPIO_PWRSW_STATE();
       EP0BCL = 1;
@@ -237,7 +243,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
-    
+
     case CMD_IFC_SET_CONFIG:
       EP0BCL = 0;               // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
@@ -251,7 +257,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
-    
+
     case CMD_IFC_READ_ID:
       if(ifc_read_id(SETUPDAT[2], EP0BUF)){
         EP0BCL = SETUPDAT[2];
@@ -259,25 +265,25 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
-    
+
     case CMD_IFC_ERASE_CHIP:
       if(!ifc_erase_chip()){
         STALLEP0();
       }
       break;
-    
+
     case CMD_IFC_READ_DATA:
       if(!ifc_prepare_read()){
         STALLEP0();
       }
       break;
-    
+
     case CMD_IFC_WRITE_DATA:
       if(!ifc_prepare_write()){
         STALLEP0();
       }
       break;
-    
+
     case CMD_IFC_ABORT:
       ifc_abort();
       break;
@@ -286,8 +292,9 @@ BOOL handle_vendorcommand(BYTE cmd)
 }
 
 
-//*********************** ENDPOINT HANDLERS ****************************
-
+//******************************************************************************
+// ENDPOINT HANDLERS
+//******************************************************************************
 
 void handle_ep1out(void)
 {
@@ -296,7 +303,7 @@ void handle_ep1out(void)
   switch(ep1state){
     case EP1STATE_NOTHING:
       break;
-      
+
     case EP1STATE_FPGA_CONFIG:
       __asm
         ; source
@@ -318,7 +325,6 @@ void handle_ep1out(void)
         mov	_AUTOPTRH2,#(_fpga_regs >> 8)
         mov	_AUTOPTRL2,#_fpga_regs
       __endasm;
-      // transfer
       for (i = 0x00; i < EP1OUTBC; i++){
         XAUTODAT2 = XAUTODAT1;
       }
@@ -339,7 +345,7 @@ void handle_ep1in(void)
     mov	_AUTOPTRL2,#_EP1INBUF
     mov	dptr,#_XAUTODAT2
   __endasm;
-  
+
   if((!sw_last) && GPIO_SW_STATE()){
     __asm
       mov	a,#0x01
@@ -352,7 +358,7 @@ void handle_ep1in(void)
     __endasm;
   }
   sw_last = GPIO_SW_STATE();
-  
+
   // XAUTODAT2 = GPIO_DCOK_STATE();
   // XAUTODAT2 = ocprot;
   __asm
@@ -365,23 +371,82 @@ void handle_ep1in(void)
     rlc	a
     movx	@dptr,a
   __endasm;
-  
+
   XAUTODAT2 = fpga_get_status();
   XAUTODAT2 = ifc_busy();
   data_cnt = ifc_get_data_count();
   XAUTODAT2 = LSB(data_cnt);
   XAUTODAT2 = MSB(data_cnt);
-  
+
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
 
   ocprot = 0;
 }
 
 
-//************************** OTHER HANDLERS ****************************
+//******************************************************************************
+// INIT
+//******************************************************************************
+
+void device_init(void)
+{
+  SETCPUFREQ(CLK_48M); SYNCDELAY;
+  REVCTL = 3;
+  I2CTL = bm400KHZ;                     // Set I2C to 400kHz
+  AUTOPTRSETUP = bmBIT2|bmBIT1|bmBIT0;  // enable autoptr; increment both
+
+  gpio_init();
+  pwr_switch_off();
+  driver_init();
+  pwr_init();
+
+  // Endpoints configuration
+  EP1OUTCFG = bmVALID|bmTYPE1;        SYNCDELAY;  // BULK 64B
+  EP1INCFG = bmVALID|bmTYPE1|bmTYPE0; SYNCDELAY;  // INT 64B
+  EP2CFG = bmVALID|bmTYPE1|0x2;       SYNCDELAY;  // BULK OUT 512B X2
+  EP6CFG = bmVALID|bmDIR|bmTYPE1|0x2; SYNCDELAY;  // BULK IN 512B X2
+  EP4CFG = bmTYPE1;                   SYNCDELAY;  // OFF
+  EP8CFG = bmTYPE1;                               // OFF
+
+  handle_ep1in();
+}
 
 
-void handle_ocprot(void)
+//******************************************************************************
+// ISR
+//******************************************************************************
+
+void sudav_isr() __interrupt SUDAV_ISR
+{
+  dosud = TRUE;
+  CLEAR_SUDAV();
+}
+
+void usbreset_isr() __interrupt USBRESET_ISR
+{
+  handle_hispeed(FALSE);
+  CLEAR_USBRESET();
+}
+
+void hispeed_isr() __interrupt HISPEED_ISR
+{
+  handle_hispeed(TRUE);
+  CLEAR_HISPEED();
+}
+
+void ep1out_isr() __interrupt EP1OUT_ISR
+{
+  doep1out = TRUE;
+  CLEAR_EP1OUT();
+}
+
+void ep1in_isr() __interrupt EP1IN_ISR
+{
+  handle_ep1in();
+  CLEAR_EP1IN();
+}
+
+void ie1_isr() __interrupt IE1_ISR
 {
   pwr_reset();
   driver_disable();
@@ -391,33 +456,41 @@ void handle_ocprot(void)
 }
 
 
-//******************************* INIT *********************************
+//******************************************************************************
+// MAIN
+//******************************************************************************
 
-void device_init(void)
+void main()
 {
-  SETCPUFREQ(CLK_48M);
-  SYNCDELAY;
-  REVCTL=3;
-  I2CTL = bm400KHZ;                     // Set I2C to 400kHz
-  AUTOPTRSETUP = bmBIT2|bmBIT1|bmBIT0;  // enable autoptr; increment both
+  device_init();
+  ifc_init();
 
-  gpio_init();
-  pwr_switch_off();
-  driver_init();
-  pwr_init();
-  
-  // Endpoints configuration
-  EP1OUTCFG = bmVALID|bmTYPE1;        // BULK 64B
-  SYNCDELAY;
-  EP1INCFG = bmVALID|bmTYPE1|bmTYPE0; // INT 64B
-  SYNCDELAY;
-  EP2CFG = bmVALID|bmTYPE1|0x2;       // BULK OUT 512B X2
-  SYNCDELAY;
-  EP6CFG = bmVALID|bmDIR|bmTYPE1|0x2; // BULK IN 512B X2
-  SYNCDELAY;
-  EP4CFG = bmTYPE1;  // OFF
-  SYNCDELAY;
-  EP8CFG = bmTYPE1;  // OFF
-  
-  handle_ep1in();
+  // Set up interrupts
+  USE_USB_INTS();
+  ENABLE_SUDAV();
+  ENABLE_USBRESET();
+  ENABLE_HISPEED();
+  ENABLE_EP1OUT();
+  ENABLE_EP1IN();
+  // OCPROT# external interrupt on falling edge
+  EX1 = 1;
+  IT1 = 1;
+
+  // Enable interrupts
+  EA=1;
+
+  RENUMERATE();
+
+  while(TRUE){
+    ifc_process();
+
+    if(dosud){
+      dosud=FALSE;
+      handle_setupdata();
+    }
+    if(doep1out){
+      doep1out = FALSE;
+      handle_ep1out();
+    }
+  }
 }
