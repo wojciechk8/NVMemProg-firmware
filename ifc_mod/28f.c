@@ -347,13 +347,9 @@ void ifc_abort(void)
   update_hiaddr();
 
   // Switch FIFOs to manual mode
-  SYNCDELAY;
-  FIFORESET = bmNAKALL;
-  SYNCDELAY;
-  EP2FIFOCFG = 0x00;
-  SYNCDELAY;
-  EP6FIFOCFG = 0x00;
-  SYNCDELAY;
+  FIFORESET = bmNAKALL; SYNCDELAY;
+  EP2FIFOCFG = 0x00;    SYNCDELAY;
+  EP6FIFOCFG = 0x00;    SYNCDELAY;
   FIFORESET = 0x00;
 
   state = STATE_IDLE;
@@ -400,12 +396,9 @@ void ifc_process(void)
         while(!(GPIFTRIG & bmBIT7))
           ;
 
-        SYNCDELAY;
-        GPIFTCB0 = 0x01;
+        GPIFTCB0 = 0x01; SYNCDELAY;
 
-        SYNCDELAY;
         GPIFTRIG = 0x0;   // trigger EP2 write data transaction
-        SYNCDELAY;
       }
       break;
   }
