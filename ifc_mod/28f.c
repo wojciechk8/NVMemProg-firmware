@@ -292,7 +292,7 @@ BOOL ifc_prepare_write(void)
   GPIFADRH = 0x01;       SYNCDELAY;
   GPIFADRL = 0xFF;
   hiaddr = 0xFFFF;
-  
+
   // Enable CE#
   GPIFIDLECTL = 0x06;    SYNCDELAY;
 
@@ -300,7 +300,7 @@ BOOL ifc_prepare_write(void)
   FIFORESET = bmNAKALL;  SYNCDELAY;
   FIFORESET = 0x82;      SYNCDELAY;
   FIFORESET = 0x00;      SYNCDELAY;
-  
+
   // Arm both EP2 buffers
   OUTPKTEND = 0x82;      SYNCDELAY;
   OUTPKTEND = 0x82;      SYNCDELAY;
@@ -330,14 +330,6 @@ void ifc_abort(void)
   GPIFABORT = 0xFF;   // abort any waveforms pending
   GPIFIDLECTL = 0x07; // reset control signals
 
-  // Reset memory command
-  GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
-  GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
-
   // Reset GPIF address
   GPIFADRH = 0x00; SYNCDELAY;
   GPIFADRL = 0x00; SYNCDELAY;
@@ -345,6 +337,16 @@ void ifc_abort(void)
   // Reset high bits of the address
   hiaddr = 0x0000;
   update_hiaddr();
+
+  // Reset memory command
+  GPIFIDLECTL = 0x06;   // enable CE#
+  GPIFSGLDATLX = CMD_RESET;
+  while(!(GPIFTRIG & bmBIT7))
+    ;
+  GPIFSGLDATLX = CMD_RESET;
+  while(!(GPIFTRIG & bmBIT7))
+    ;
+  GPIFIDLECTL = 0x07;   // disable CE#
 
   // Switch FIFOs to manual mode
   FIFORESET = bmNAKALL; SYNCDELAY;
@@ -374,7 +376,7 @@ void ifc_process(void)
         hiaddr++;
         update_hiaddr();
         // Reload Transaction Counter
-        GPIFTCB1 = 0x02; SYNCDELAY; 
+        GPIFTCB1 = 0x02; SYNCDELAY;
         GPIFTCB0 = 0x00;
       }
       break;
