@@ -335,7 +335,7 @@ void handle_ep1out(void)
 }
 
 
-void handle_ep1in(void)
+void handle_ep1ibn(void)
 {
   static __bit sw_last=FALSE;
   WORD data_cnt;
@@ -407,8 +407,6 @@ void device_init(void)
   EP6CFG = bmVALID|bmDIR|bmTYPE1|0x2; SYNCDELAY;  // BULK IN 512B X2
   EP4CFG = bmTYPE1;                   SYNCDELAY;  // OFF
   EP8CFG = bmTYPE1;                               // OFF
-
-  handle_ep1in();
 }
 
 
@@ -440,10 +438,14 @@ void ep1out_isr() __interrupt EP1OUT_ISR
   CLEAR_EP1OUT();
 }
 
-void ep1in_isr() __interrupt EP1IN_ISR
+void ibn_isr() __interrupt IBN_ISR
 {
-  handle_ep1in();
-  CLEAR_EP1IN();
+  CLEAR_USBINT();
+  if(IBNIRQ & bmEP1IBN){
+    handle_ep1ibn();
+    IBNIRQ = bmEP1IBN;
+  }
+  NAKIRQ = bmIBN;
 }
 
 void ie1_isr() __interrupt IE1_ISR
@@ -471,7 +473,8 @@ void main()
   ENABLE_USBRESET();
   ENABLE_HISPEED();
   ENABLE_EP1OUT();
-  ENABLE_EP1IN();
+  IBNIE = bmEP1IBN;
+  NAKIE = bmIBN;
   // OCPROT# external interrupt on falling edge
   EX1 = 1;
   IT1 = 1;
