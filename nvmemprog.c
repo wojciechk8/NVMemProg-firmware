@@ -374,9 +374,6 @@ void handle_ep1ibn(void)
 
   XAUTODAT2 = fpga_get_status();
   XAUTODAT2 = ifc_busy();
-  data_cnt = ifc_get_data_count();
-  XAUTODAT2 = LSB(data_cnt);
-  XAUTODAT2 = MSB(data_cnt);
 
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
 

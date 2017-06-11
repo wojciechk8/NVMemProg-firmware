@@ -37,6 +37,5 @@ BOOL ifc_prepare_write(void);
 void ifc_abort(void);
 
 BOOL ifc_busy(void);
-WORD ifc_get_data_count(void);
 
 void ifc_process(void);

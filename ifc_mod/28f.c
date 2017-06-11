@@ -323,12 +323,6 @@ BOOL ifc_busy(void)
 }
 
 
-WORD ifc_get_data_count(void)
-{
-  return hiaddr;
-}
-
-
 void ifc_abort(void)
 {
   GPIFABORT = 0xFF;   // abort any waveforms pending

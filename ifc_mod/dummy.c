@@ -78,12 +78,6 @@ BOOL ifc_busy(void)
 }
 
 
-WORD ifc_get_data_count(void)
-{
-  return 0;
-}
-
-
 void ifc_abort(void)
 {
   return;
