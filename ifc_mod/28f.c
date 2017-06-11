@@ -372,12 +372,12 @@ void ifc_process(void)
 
     case STATE_READ_DATA:
       if(GPIFTRIG & bmBIT7){
-        GPIFTRIG = bmBIT2 | 0x2; // trigger next transaction (read)
         hiaddr++;
         update_hiaddr();
         // Reload Transaction Counter
         GPIFTCB1 = 0x02; SYNCDELAY;
-        GPIFTCB0 = 0x00;
+        GPIFTCB0 = 0x00; SYNCDELAY;
+        GPIFTRIG = bmBIT2 | 0x2; // trigger next transaction (read)
       }
       break;
 
