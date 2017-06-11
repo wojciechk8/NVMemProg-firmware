@@ -205,6 +205,8 @@ BOOL ifc_read_id(BYTE size, BYTE *id)
     return FALSE;
   }
 
+  GPIFIDLECTL = 0x06;   // enable CE#
+
   GPIFSGLDATLX = CMD_READ_ID;
   while(!(GPIFTRIG & bmBIT7))
     ;
@@ -224,6 +226,8 @@ BOOL ifc_read_id(BYTE size, BYTE *id)
   while(!(GPIFTRIG & bmBIT7))
     ;
   id[1] = GPIFSGLDATLNOX;
+
+  GPIFIDLECTL = 0x07;   // disable CE#
 
   ifc_abort();
 
