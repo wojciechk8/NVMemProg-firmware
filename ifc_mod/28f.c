@@ -319,7 +319,8 @@ BOOL ifc_prepare_write(void)
 
 BOOL ifc_busy(void)
 {
-  return (state != STATE_IDLE);
+  return (state != STATE_IDLE)
+         && ((state != STATE_WRITE_DATA) || !(EP24FIFOFLGS & bmBIT1));
 }
 
 

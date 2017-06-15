@@ -7,5 +7,7 @@
 
 2. Give feedback about the data write completeness in 28f interface.
    It could be done via ifc_busy function, by checking endpoint empty flag.
+   
+   Done, OK
 
 3. Suppressing INT1 when switching power off (CMD_PWR_SWITCH) doesn't work.
