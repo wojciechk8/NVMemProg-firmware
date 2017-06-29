@@ -1,13 +1,1 @@
-1. Status polling on ep1in returns state from the previous read, not the actual.
-   Check if it's possible to fix. Maybe move status polling to EP0?
-   
-   It's possible to fix using the In-Bulk-NAK interrupt.
-   
-   Done, OK
-
-2. Give feedback about the data write completeness in 28f interface.
-   It could be done via ifc_busy function, by checking endpoint empty flag.
-   
-   Done, OK
-
-3. Suppressing INT1 when switching power off (CMD_PWR_SWITCH) doesn't work.
+- Suppressing INT1 when switching power off (CMD_PWR_SWITCH) doesn't work.
