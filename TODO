@@ -3,3 +3,4 @@
   (sth like fx2lib extension). The reason is that in many places there are meaningless
   (without EZ-USB TRM) registers assigments, so that fragments are hard to read.
 - Test CMD_FIRMWARE vendor command
+- Test CMD_FPGA_WRITE_REGS after change

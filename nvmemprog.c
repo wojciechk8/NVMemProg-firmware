@@ -44,8 +44,7 @@
 
 enum{
   EP1STATE_NOTHING,
-  EP1STATE_FPGA_CONFIG,
-  EP1STATE_FPGA_REGS
+  EP1STATE_FPGA_CONFIG
 }ep1state = EP1STATE_NOTHING;
 
 volatile __bit ocprot = FALSE;
@@ -114,6 +113,8 @@ BOOL handle_set_configuration(BYTE cfg)
 
 BOOL handle_vendorcommand(BYTE cmd)
 {
+  BYTE i;
+  
   switch((VENDOR_CMD)cmd){
     case CMD_LED:
       if(SETUPDAT[4] == 0){       // wIndex
@@ -141,17 +142,21 @@ BOOL handle_vendorcommand(BYTE cmd)
       }
       break;
 
-    case CMD_FPGA_WRITE_REG:
-      if(SETUPDAT[4] < FPGA_REG_NUM){
-        fpga_regs.reg[SETUPDAT[4]] = SETUPDAT[2];
-      }else{
-        STALLEP0();
-      }
-      break;
-
     case CMD_FPGA_WRITE_REGS:
-      EP1OUTBC = 0; // arm EP1OUT
-      ep1state = EP1STATE_FPGA_REGS;
+      EP0BCL = 0;               // arm EP0
+      while (EP0CS & bmEPBUSY)  // wait for OUT data
+        ;
+      __asm
+        ; source
+        mov	_AUTOPTRH1,#(_EP1OUTBUF >> 8)
+        mov	_AUTOPTRL1,#_EP1OUTBUF
+        ; destination
+        mov	_AUTOPTRH2,#(_fpga_regs >> 8)
+      __endasm;
+      AUTOPTRL2 = SETUPDAT[4];
+      for (i = 0x00; i < EP1OUTBC; i++){
+        XAUTODAT2 = XAUTODAT1;
+      }
       break;
 
     case CMD_DRIVER_ENABLE:
@@ -301,8 +306,6 @@ BOOL handle_vendorcommand(BYTE cmd)
 
 void handle_ep1out(void)
 {
-  BYTE i;
-
   switch(ep1state){
     case EP1STATE_NOTHING:
       break;
@@ -317,22 +320,6 @@ void handle_ep1out(void)
       if(fpga_get_status() == FPGA_STATUS_CONFIGURING){
         EP1OUTBC = 0; // arm EP for further data
       }
-      break;
-
-    case EP1STATE_FPGA_REGS:
-      __asm
-        ; source
-        mov	_AUTOPTRH1,#(_EP1OUTBUF >> 8)
-        mov	_AUTOPTRL1,#_EP1OUTBUF
-        ; destination
-        mov	_AUTOPTRH2,#(_fpga_regs >> 8)
-        mov	_AUTOPTRL2,#_fpga_regs
-      __endasm;
-      for (i = 0x00; i < EP1OUTBC; i++){
-        XAUTODAT2 = XAUTODAT1;
-      }
-
-      ep1state = EP1STATE_NOTHING;
       break;
   }
 }
