@@ -26,6 +26,8 @@
 #include "../common.h"
 
 
+extern const char ifc_signature[8];
+
 void ifc_init(void);
 
 BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param); // Data pointed by the autopointer 1

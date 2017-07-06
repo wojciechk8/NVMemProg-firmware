@@ -33,7 +33,7 @@
 // Vendor USB Commands
 typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_LED=0x10,               // 0=off 1=on     0=green 1=red   ---
-  CMD_VERSION=0x11,           // ---            ---             FW version
+  CMD_FIRMWARE=0x11,          // ---            ---             FW signature (8 bytes)
 
 
   CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---(data via EP1)

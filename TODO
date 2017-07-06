@@ -1,1 +1,2 @@
 - Suppressing INT1 when switching power off (CMD_PWR_SWITCH) doesn't work.
+- Test CMD_FIRMWARE vendor command

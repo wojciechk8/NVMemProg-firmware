@@ -29,6 +29,8 @@
 #define SYNCDELAY SYNCDELAY3
 
 
+const char ifc_signature[8] = "28f";
+
 enum MEMORY_CMD{
   CMD_AUTO_ERASE_CHIP=0x30,
   CMD_AUTO_PROGRAM=0x40,

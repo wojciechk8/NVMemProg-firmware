@@ -123,10 +123,13 @@ BOOL handle_vendorcommand(BYTE cmd)
       }
       break;
 
-    case CMD_VERSION:
-      EP0BUF[0] = LSB(FW_VERSION);
-      EP0BUF[1] = MSB(FW_VERSION);
-      EP0BCL = 2;
+    case CMD_FIRMWARE:
+      SUDPTRCTL = 0; SYNCDELAY;
+      EP0BCH = 0;    SYNCDELAY;
+      EP0BCL = sizeof(ifc_signature);
+      SUDPTRH = MSB(ifc_signature);
+      SUDPTRL = LSB(ifc_signature);
+      SUDPTRCTL = bmSDPAUTO;
       break;
 
     case CMD_FPGA_START_CONFIG:

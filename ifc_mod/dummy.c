@@ -24,6 +24,8 @@
 #include "module.h"
 
 
+const char ifc_signature[8] = "dummy";
+
 
 // Private Functions ---------------------------------------------------
 
