@@ -328,7 +328,6 @@ void handle_ep1out(void)
 void handle_ep1ibn(void)
 {
   static __bit sw_last=FALSE;
-  WORD data_cnt;
 
   __asm
     mov	_AUTOPTRH2,#(_EP1INBUF >> 8)
