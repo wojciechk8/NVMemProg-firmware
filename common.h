@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * common.h
- * Defines and types common with the host software
+ * Defines and types shared with the host software
  *
  */
 

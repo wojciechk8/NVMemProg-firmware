@@ -16,7 +16,7 @@
  *
  * nvmemprog.c
  *
- * Main code
+ * Main and initialization code, USB commands handling
  *
  */
 
