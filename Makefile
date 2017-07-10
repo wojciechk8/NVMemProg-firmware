@@ -1,5 +1,5 @@
 # The name for the project
-TARGET:=NVMemProg
+#TARGET:=NVMemProg
 
 # Device VID, PID
 VID:=0x04b4
@@ -19,7 +19,7 @@ ASRC:=$(wildcard *.a51)
 # Memory interface modules
 IFCMODDIR:=ifc_mod
 IFCMODSRC:=$(wildcard $(IFCMODDIR)/*.c)
-IFCMODTARGETS:=$(addprefix $(TARGET)_,$(notdir $(basename $(IFCMODSRC))))
+IFCMODTARGETS:=$(notdir $(basename $(IFCMODSRC)))
 
 # Other include directories
 INCDIR:=.
@@ -101,7 +101,7 @@ iic: $(IIC)
 
 .PHONY: program
 program: $(IHX)
-	$(FX2PROG) -id=$(VID).$(PID) prg:$(BINDIR)/$(TARGET)_$(IFC).ihx
+	$(FX2PROG) -id=$(VID).$(PID) prg:$(BINDIR)/$(IFC).ihx
 	$(FX2PROG) -id=$(VID).$(PID) run
 	$(SIZE) $(IHX)
 
@@ -132,14 +132,14 @@ $(IFCMODDIR)/$(OBJDIR)/%.rel: $(IFCMODDIR)/%.c
 	$(CC) -MM $(CFLAGS) -c $< -o $(patsubst %.rel,%.d,$@)
 	sed -i "1s/^/$(IFCMODDIR)\/$(OBJDIR)\//" $(patsubst %.rel,%.d,$@)
 
-$(BINDIR)/$(TARGET)_%.ihx: $(IFCMODDIR)/$(OBJDIR)/%.rel $(OBJ)
+$(BINDIR)/%.ihx: $(IFCMODDIR)/$(OBJDIR)/%.rel $(OBJ)
 	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJ) $< -o $@
 	$(RM) $(MAP) $(LK)
 
-$(BINDIR)/$(TARGET)_%.bix: $(BINDIR)/$(TARGET)_%.ihx
+$(BINDIR)/%.bix: $(BINDIR)/%.ihx
 	$(OBJCOPY) -I ihex -O binary $< $@
 
-$(BINDIR)/$(TARGET)_%.iic: $(BINDIR)/$(TARGET)_%.ihx
+$(BINDIR)/%.iic: $(BINDIR)/%.ihx
 	$(FX2LIBDIR)/utils/ihx2iic.py -v $(VID) -p $(PID) $< $@
 
 # explicit rules
