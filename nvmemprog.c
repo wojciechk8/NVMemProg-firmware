@@ -127,9 +127,9 @@ BOOL handle_vendorcommand(BYTE cmd)
     case CMD_FIRMWARE:
       SUDPTRCTL = 0; SYNCDELAY;
       EP0BCH = 0;    SYNCDELAY;
-      EP0BCL = sizeof(ifc_signature);
-      SUDPTRH = MSB(ifc_signature);
-      SUDPTRL = LSB(ifc_signature);
+      EP0BCL = sizeof(signature);
+      SUDPTRH = MSB(signature);
+      SUDPTRL = LSB(signature);
       SUDPTRCTL = bmSDPAUTO;
       break;
 

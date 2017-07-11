@@ -26,7 +26,7 @@
 #include "../common.h"
 
 
-extern const char ifc_signature[8];
+extern const char signature[SIGNATURE_SIZE];
 
 void ifc_init(void);
 
