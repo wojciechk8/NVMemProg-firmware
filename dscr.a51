@@ -1,5 +1,5 @@
 ; Copyright (C) 2009 Ubixum, Inc.
-; Copyright (C) 2016 Wojciech Krutnik <wojciechk8@gmail.com>
+; Copyright (C) 2016, 2017 Wojciech Krutnik <wojciechk8@gmail.com>
 ;
 ; This library is free software; you can redistribute it and/or
 ; modify it under the terms of the GNU Lesser General Public
