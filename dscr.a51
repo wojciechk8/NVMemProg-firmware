@@ -57,8 +57,8 @@ _dev_dscr:
 	.db	0xff					  ; subclass (vendor specific)
 	.db	0xff					  ; protocol (vendor specific)
 	.db	64						  ; packet size (ep0)
-	.dw	0xB404					  ; vendor id   TO BE ASSIGNED
-	.dw	0x1386					  ; product id  TO BE ASSIGNED
+	.dw	0x0912					  ; vendor id   TO BE ASSIGNED
+	.dw	0x0148					  ; product id  TO BE ASSIGNED
 	.dw	0x0100					  ; version id
 	.db	1		                  ; manufacturer str idx
 	.db	2				          ; product str idx

@@ -23,8 +23,8 @@
 
 
 #ifndef SDCC
-  #define VID 0x04b4
-  #define PID 0x8613
+  #define VID 0x1209
+  #define PID 0x4801
   #define DEVICE_STATUS_SIZE sizeof (DEVICE_STATUS)
   typedef unsigned char BYTE;
   typedef unsigned short WORD;

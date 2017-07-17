@@ -2,8 +2,8 @@
 #TARGET:=NVMemProg
 
 # Device VID, PID
-VID:=0x04b4
-PID:=0x8613
+VID:=0x1209
+PID:=0x4801
 
 # Linker parameters
 DSCR_AREA:=-Wl"-b DSCR_AREA=0x3e00"
