@@ -42,15 +42,8 @@
 #define SYNCDELAY SYNCDELAY3
 
 
-enum{
-  EP1STATE_NOTHING,
-  EP1STATE_FPGA_CONFIG
-}ep1state = EP1STATE_NOTHING;
-
 volatile __bit ocprot = FALSE;
-
 volatile __bit dosud = FALSE;
-volatile __bit doep1out = FALSE;
 
 
 //******************************************************************************
@@ -134,10 +127,22 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_FPGA_START_CONFIG:
-      if(fpga_start_config()){
-        EP1OUTBC = 0; // arm EP1OUT
-        ep1state = EP1STATE_FPGA_CONFIG;
-      }else{
+      if(!fpga_start_config()){
+        STALLEP0();
+      }
+      break;
+    
+    case CMD_FPGA_WRITE_CONFIG:
+      EP0BCL = 0;               // arm EP0
+      while (EP0CS & bmEPBUSY)  // wait for OUT data
+        ;
+      __asm
+        ; source
+        mov	_AUTOPTRH1,#(_EP0BUF >> 8)
+        mov	_AUTOPTRL1,#_EP0BUF
+      __endasm;
+      fpga_write_config(EP0BCL);
+      if(fpga_get_status() == FPGA_STATUS_UNCONFIGURED){
         STALLEP0();
       }
       break;
@@ -304,27 +309,6 @@ BOOL handle_vendorcommand(BYTE cmd)
 // ENDPOINT HANDLERS
 //******************************************************************************
 
-void handle_ep1out(void)
-{
-  switch(ep1state){
-    case EP1STATE_NOTHING:
-      break;
-
-    case EP1STATE_FPGA_CONFIG:
-      __asm
-        ; source
-        mov	_AUTOPTRH1,#(_EP1OUTBUF >> 8)
-        mov	_AUTOPTRL1,#_EP1OUTBUF
-      __endasm;
-      fpga_write_config(EP1OUTBC);
-      if(fpga_get_status() == FPGA_STATUS_CONFIGURING){
-        EP1OUTBC = 0; // arm EP for further data
-      }
-      break;
-  }
-}
-
-
 void handle_ep1ibn(void)
 {
   static __bit sw_last=FALSE;
@@ -387,7 +371,6 @@ void device_init(void)
   pwr_init();
 
   // Endpoints configuration
-  EP1OUTCFG = bmVALID|bmTYPE1;        SYNCDELAY;  // BULK 64B
   EP1INCFG = bmVALID|bmTYPE1|bmTYPE0; SYNCDELAY;  // INT 64B
   EP2CFG = bmVALID|bmTYPE1|0x2;       SYNCDELAY;  // BULK OUT 512B X2
   EP6CFG = bmVALID|bmDIR|bmTYPE1|0x2; SYNCDELAY;  // BULK IN 512B X2
@@ -416,12 +399,6 @@ void hispeed_isr() __interrupt HISPEED_ISR
 {
   handle_hispeed(TRUE);
   CLEAR_HISPEED();
-}
-
-void ep1out_isr() __interrupt EP1OUT_ISR
-{
-  doep1out = TRUE;
-  CLEAR_EP1OUT();
 }
 
 void ibn_isr() __interrupt IBN_ISR
@@ -458,7 +435,6 @@ void main()
   ENABLE_SUDAV();
   ENABLE_USBRESET();
   ENABLE_HISPEED();
-  ENABLE_EP1OUT();
   IBNIE = bmEP1IBN;
   NAKIE = bmIBN;
   // OCPROT# external interrupt on falling edge
@@ -476,10 +452,6 @@ void main()
     if(dosud){
       dosud=FALSE;
       handle_setupdata();
-    }
-    if(doep1out){
-      doep1out = FALSE;
-      handle_ep1out();
     }
   }
 }

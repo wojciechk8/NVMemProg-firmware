@@ -3,5 +3,6 @@
   (sth like fx2lib extension).
 - Test CMD_FIRMWARE vendor command
 - Test CMD_FPGA_WRITE_REGS after change
+- Test CMD_FPGA_WRITE_CONFIG
 
 - Move dscr.a51 contents to C file

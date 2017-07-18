@@ -39,8 +39,9 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 #define SIGNATURE_SIZE 16
 
 
-  CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---(data via EP1)
-  CMD_FPGA_WRITE_REGS=0x21,   // ---            addr            data
+  CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---
+  CMD_FPGA_WRITE_CONFIG=0x21, // ---            ---             data
+  CMD_FPGA_WRITE_REGS=0x22,   // ---            addr            data
 
 
   CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
