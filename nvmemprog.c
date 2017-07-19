@@ -133,7 +133,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
     
     case CMD_FPGA_WRITE_CONFIG:
-      EP0BCL = 0;               // arm EP0
+      EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
       __asm
@@ -148,7 +148,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_FPGA_WRITE_REGS:
-      EP0BCL = 0;               // arm EP0
+      EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
       __asm
@@ -182,7 +182,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_DRIVER_CONFIG:
-      EP0BCL = 0;               // arm EP0
+      EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
       __asm
@@ -249,7 +249,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_EEPROM_WRITE:
-      EP0BCL = 0;               // arm EP0
+      EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
       if(!eeprom_write(EEPROM_ADDR, SETUP_INDEX(), EP0BCL, EP0BUF)){
@@ -258,7 +258,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_IFC_SET_CONFIG:
-      EP0BCL = 0;               // arm EP0
+      EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
       __asm
