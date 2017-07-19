@@ -70,7 +70,10 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_IFC_ERASE_CHIP=0x62,    // ---            ---             ---
   CMD_IFC_READ_DATA=0x63,     // ---            ---             ---(data via EP6)
   CMD_IFC_WRITE_DATA=0x64,    // ---            ---             ---(data via EP2)
-  CMD_IFC_ABORT=0x6F          // ---            ---             ---
+  CMD_IFC_ABORT=0x6F,         // ---            ---             ---
+  
+  // this is a built-in command
+  CMD_FIRMWARE_LOAD=0xA0      // addr           ---             data
 }VENDOR_CMD;
 
 
