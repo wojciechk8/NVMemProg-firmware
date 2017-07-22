@@ -133,17 +133,22 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
     
     case CMD_FPGA_WRITE_CONFIG:
-      EP0BCL = 0; SYNCDELAY;    // arm EP0
-      while (EP0CS & bmEPBUSY)  // wait for OUT data
-        ;
-      __asm
-        ; source
-        mov	_AUTOPTRH1,#(_EP0BUF >> 8)
-        mov	_AUTOPTRL1,#_EP0BUF
-      __endasm;
-      fpga_write_config(EP0BCL);
-      if(fpga_get_status() == FPGA_STATUS_UNCONFIGURED){
+      if(fpga_get_status() != FPGA_STATUS_CONFIGURING){
         STALLEP0();
+      }
+      while (fpga_get_status() == FPGA_STATUS_CONFIGURING){
+        EP0BCL = 0; SYNCDELAY;    // arm EP0
+        while (EP0CS & bmEPBUSY)  // wait for OUT data
+          ;
+        __asm
+          ; source
+          mov	_AUTOPTRH1,#(_EP0BUF >> 8)
+          mov	_AUTOPTRL1,#_EP0BUF
+        __endasm;
+        fpga_write_config(EP0BCL);
+        if(fpga_get_status() == FPGA_STATUS_UNCONFIGURED){
+          STALLEP0();
+        }
       }
       break;
 
