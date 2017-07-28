@@ -166,6 +166,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         mov	_AUTOPTRL1,#_EP1OUTBUF
         ; destination
         mov	_AUTOPTRH2,#(_fpga_regs >> 8)
+        mov	_AUTOPTRL2,#_fpga_regs
       __endasm;
       AUTOPTRL2 = SETUPDAT[4];
       for (i = 0x00; i < EP1OUTBC; i++){
