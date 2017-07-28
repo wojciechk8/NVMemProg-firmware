@@ -32,7 +32,7 @@ void ifc_init(void);
 
 BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param); // Data pointed by the autopointer 1
 
-BOOL ifc_read_id(BYTE size, BYTE *id);
+BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id);
 BOOL ifc_erase_chip(void);
 BOOL ifc_prepare_read(void);
 BOOL ifc_prepare_write(void);

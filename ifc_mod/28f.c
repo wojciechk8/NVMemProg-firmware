@@ -197,14 +197,23 @@ BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param)
 }
 
 
-BOOL ifc_read_id(BYTE size, BYTE *id)
+BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
 {
   BYTE dummy;
 
-  size;
-
   if(state != STATE_IDLE){
     return FALSE;
+  }
+  
+  switch (type) {
+    case IFC_ID_MANUFACTURER:
+      GPIFADRL = 0x00; SYNCDELAY;
+      break;
+    case IFC_ID_DEVICE:
+      GPIFADRL = 0x01; SYNCDELAY;
+      break;
+    default:
+      return FALSE;
   }
 
   GPIFIDLECTL = 0x06;   // enable CE#
@@ -212,22 +221,11 @@ BOOL ifc_read_id(BYTE size, BYTE *id)
   GPIFSGLDATLX = CMD_READ_ID;
   while(!(GPIFTRIG & bmBIT7))
     ;
-
+  
   dummy = GPIFSGLDATLX;  // trigger read sequence
   while(!(GPIFTRIG & bmBIT7))
     ;
   id[0] = GPIFSGLDATLNOX;
-
-
-  GPIFADRL = 0x01; SYNCDELAY;
-  GPIFSGLDATLX = CMD_READ_ID;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
-
-  dummy = GPIFSGLDATLX;  // trigger read sequence
-  while(!(GPIFTRIG & bmBIT7))
-    ;
-  id[1] = GPIFSGLDATLNOX;
 
   GPIFIDLECTL = 0x07;   // disable CE#
 
