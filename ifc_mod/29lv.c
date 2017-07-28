@@ -287,7 +287,7 @@ BOOL ifc_prepare_read(void)
   FIFORESET = bmNAKALL;  SYNCDELAY;
   FIFORESET = 0x06;      SYNCDELAY;
   // Switch the FIFO to auto mode
-  EP6FIFOCFG = bmAUTOIN; SYNCDELAY;
+  EP6FIFOCFG = bmAUTOIN|bmWORDWIDE; SYNCDELAY;
   
   // Trigger GPIF transaction
   GPIFTRIG = bmBIT2 | 0x2;
@@ -326,7 +326,7 @@ BOOL ifc_prepare_write(void)
   OUTPKTEND = 0x82;      SYNCDELAY;
   OUTPKTEND = 0x82;      SYNCDELAY;
   // Switch the FIFO to auto mode
-  EP2FIFOCFG = bmAUTOOUT;
+  EP2FIFOCFG = bmAUTOOUT|bmWORDWIDE;
 
   state = STATE_WRITE_DATA;
 
@@ -361,8 +361,8 @@ void ifc_abort(void)
 
   // Switch FIFOs to manual mode
   FIFORESET = bmNAKALL; SYNCDELAY;
-  EP2FIFOCFG = 0x00;    SYNCDELAY;
-  EP6FIFOCFG = 0x00;    SYNCDELAY;
+  EP2FIFOCFG = 0x00|bmWORDWIDE; SYNCDELAY;
+  EP6FIFOCFG = 0x00|bmWORDWIDE; SYNCDELAY;
   FIFORESET = 0x00;
 
   state = STATE_IDLE;
