@@ -44,6 +44,10 @@
 
 volatile __bit ocprot = FALSE;
 volatile __bit dosud = FALSE;
+volatile __bit doep0out = FALSE;
+volatile enum EP0State{
+  EP0STATE_
+}ep0out_state;
 
 
 //******************************************************************************
@@ -107,6 +111,7 @@ BOOL handle_set_configuration(BYTE cfg)
 BOOL handle_vendorcommand(BYTE cmd)
 {
   BYTE i;
+  WORD cnt;
   
   switch((VENDOR_CMD)cmd){
     case CMD_LED:
@@ -118,7 +123,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_FIRMWARE:
-      for (i = 0; i < SIGNATURE_SIZE; i++) {
+      for (i = 0; i < SETUPDAT[6]; i++) {
         EP0BUF[i] = signature[i];
       }
       EP0BCL = SIGNATURE_SIZE;
@@ -134,7 +139,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       if(fpga_get_status() != FPGA_STATUS_CONFIGURING){
         STALLEP0();
       }
-      while (fpga_get_status() == FPGA_STATUS_CONFIGURING){
+      for(cnt = SETUP_LENGTH(); cnt; cnt -= EP0BCL){
         EP0BCL = 0; SYNCDELAY;    // arm EP0
         while (EP0CS & bmEPBUSY)  // wait for OUT data
           ;
@@ -146,6 +151,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         fpga_write_config(EP0BCL);
         if(fpga_get_status() == FPGA_STATUS_UNCONFIGURED){
           STALLEP0();
+          break;
         }
       }
       break;
@@ -311,6 +317,11 @@ BOOL handle_vendorcommand(BYTE cmd)
 //******************************************************************************
 // ENDPOINT HANDLERS
 //******************************************************************************
+
+void handle_ep0out(void)
+{
+  
+}
 
 void handle_ep1ibn(void)
 {
