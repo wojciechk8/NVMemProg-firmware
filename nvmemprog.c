@@ -118,12 +118,10 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_FIRMWARE:
-      SUDPTRCTL = 0; SYNCDELAY;
-      EP0BCH = 0;    SYNCDELAY;
-      EP0BCL = sizeof(signature);
-      SUDPTRH = MSB(signature);
-      SUDPTRL = LSB(signature);
-      SUDPTRCTL = bmSDPAUTO;
+      for (i = 0; i < SIGNATURE_SIZE; i++) {
+        EP0BUF[i] = signature[i];
+      }
+      EP0BCL = SIGNATURE_SIZE;
       break;
 
     case CMD_FPGA_START_CONFIG:
