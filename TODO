@@ -4,5 +4,6 @@
 - Test CMD_FIRMWARE vendor command
 - Test CMD_FPGA_WRITE_REGS after change
 - Test CMD_FPGA_WRITE_CONFIG
+- Test 29LV interface
 
 - Move dscr.a51 contents to C file
