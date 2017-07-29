@@ -283,7 +283,7 @@ BOOL handle_vendorcommand(BYTE cmd)
 
     case CMD_IFC_READ_ID:
       if(ifc_read_id(SETUPDAT[4], EP0BUF)){
-        EP0BCL = SETUPDAT[2];
+        EP0BCL = SETUPDAT[6];
       }else{
         STALLEP0();
       }

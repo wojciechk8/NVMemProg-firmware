@@ -66,7 +66,7 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   
   
   CMD_IFC_SET_CONFIG=0x60,    // param          config_type     data
-  CMD_IFC_READ_ID=0x61,       // length         id_type         id
+  CMD_IFC_READ_ID=0x61,       // ---            id_type         id
   CMD_IFC_ERASE_CHIP=0x62,    // ---            ---             ---
   CMD_IFC_READ_DATA=0x63,     // ---            ---             ---(data via EP6)
   CMD_IFC_WRITE_DATA=0x64,    // ---            ---             ---(data via EP2)
