@@ -1,8 +1,6 @@
 - Suppressing INT1 when switching power off (CMD_PWR_SWITCH) doesn't work.
 - Wrappers or macros to EZ-USB specific operations, which are not covered by fx2lib
   (sth like fx2lib extension).
-- Test CMD_FPGA_WRITE_REGS after change
-- Test CMD_FPGA_WRITE_CONFIG
 - Test 29LV interface
 
 - Move dscr.a51 contents to C file
