@@ -47,7 +47,7 @@
 //                                                                                         
 // AddrMode Same Val  Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
 // DataMode NO Data   Activate  NO Data   NO Data   NO Data   NO Data   NO Data            
-// NextData SameData  SameData  NextData  SameData  SameData  SameData  SameData           
+// NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
 // IF/Wait  Wait 8    Wait 1    IF        Wait 1    Wait 1    Wait 1    Wait 1             
 //   Term A                     IntReady                                                   
@@ -74,7 +74,7 @@
 //                                                                                         
 // AddrMode Same Val  Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
 // DataMode Activate  NO Data   NO Data   NO Data   NO Data   NO Data   NO Data            
-// NextData SameData  NextData  SameData  SameData  SameData  SameData  SameData           
+// NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
 // IF/Wait  Wait 5    Wait 1    IF        Wait 1    Wait 1    Wait 1    Wait 1             
 //   Term A                     IntReady                                                   
@@ -101,7 +101,7 @@
 //                                                                                         
 // AddrMode Same Val  Inc Val   Same Val  Same Val  Same Val  Same Val  Same Val           
 // DataMode NO Data   Activate  NO Data   NO Data   NO Data   NO Data   NO Data            
-// NextData SameData  SameData  NextData  SameData  SameData  SameData  SameData           
+// NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
 // IF/Wait  Wait 4    Wait 1    Wait 2    IF        Wait 1    Wait 1    Wait 1             
 //   Term A                               IntReady                                         
@@ -128,7 +128,7 @@
 //                                                                                         
 // AddrMode Inc Val   Same Val  Same Val  Same Val  Same Val  Same Val  Same Val           
 // DataMode Activate  Activate  NO Data   NO Data   NO Data   NO Data   NO Data            
-// NextData SameData  SameData  SameData  NextData  SameData  SameData  SameData           
+// NextData SameData  SameData  NextData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
 // IF/Wait  Wait 1    Wait 5    Wait 1    IF        Wait 1    Wait 1    Wait 1             
 //   Term A                               IntReady                                         
@@ -160,22 +160,22 @@ const char xdata WaveData[128] =
 {                                      
 // Wave 0 
 /* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x02,     0x05,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 1 
 /* LenBr */ 0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x02,     0x04,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* Opcode*/ 0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 2 
 /* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x00,     0x0A,     0x04,     0x01,     0x00,     0x00,     0x00,     0x00,
+/* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
 // Wave 3 
 /* LenBr */ 0x01,     0x05,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x0A,     0x02,     0x00,     0x05,     0x00,     0x00,     0x00,     0x00,
+/* Opcode*/ 0x0A,     0x02,     0x04,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x26,     0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
 };                     
