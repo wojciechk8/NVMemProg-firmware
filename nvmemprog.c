@@ -374,8 +374,9 @@ void handle_ep1ibn(void)
 
 void device_init(void)
 {
-  SETCPUFREQ(CLK_48M); SYNCDELAY;
-  REVCTL = 3;
+  IFCONFIG = bmIFCLKSRC|bm3048MHZ;      // IFCLK = Internal 48MHz
+  SETCPUFREQ(CLK_48M);
+  REVCTL = 3; SYNCDELAY;
   I2CTL = bm400KHZ;                     // Set I2C to 400kHz
   AUTOPTRSETUP = bmBIT2|bmBIT1|bmBIT0;  // enable autoptr; increment both
 
