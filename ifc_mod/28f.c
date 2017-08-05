@@ -216,8 +216,6 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
       return FALSE;
   }
 
-  GPIFIDLECTL = 0x06;   // enable CE#
-
   GPIFSGLDATLX = CMD_READ_ID;
   while(!(GPIFTRIG & bmBIT7))
     ;
@@ -226,8 +224,6 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
   while(!(GPIFTRIG & bmBIT7))
     ;
   id[0] = GPIFSGLDATLNOX;
-
-  GPIFIDLECTL = 0x07;   // disable CE#
 
   ifc_abort();
 
@@ -264,7 +260,7 @@ BOOL ifc_prepare_read(void)
   GPIFTCB1 = 0x02;       SYNCDELAY;
   GPIFTCB0 = 0x00;       SYNCDELAY;
 
-  // enable CE#
+  // Enable CE#
   GPIFIDLECTL = 0x06;    SYNCDELAY;
 
   // Reset EP6 FIFO
@@ -338,14 +334,12 @@ void ifc_abort(void)
   update_hiaddr();
 
   // Reset memory command
-  GPIFIDLECTL = 0x06;   // enable CE#
   GPIFSGLDATLX = CMD_RESET;
   while(!(GPIFTRIG & bmBIT7))
     ;
   GPIFSGLDATLX = CMD_RESET;
   while(!(GPIFTRIG & bmBIT7))
     ;
-  GPIFIDLECTL = 0x07;   // disable CE#
 
   // Switch FIFOs to manual mode
   FIFORESET = bmNAKALL; SYNCDELAY;
