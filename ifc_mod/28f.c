@@ -169,8 +169,6 @@ void ifc_init(void)
 
   // Don't use flowstates
   FLOWSTATE = 0x00;
-
-  ifc_abort();
 }
 
 

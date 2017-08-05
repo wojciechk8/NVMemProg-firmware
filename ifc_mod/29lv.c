@@ -249,8 +249,6 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
 
   GPIFIDLECTL = 0x07;   // disable CE#
 
-  ifc_abort();
-
   return TRUE;
 }
 
