@@ -113,7 +113,6 @@ typedef struct{
   BYTE sw;
   BYTE dcok;
   BYTE ocprot;
-  BYTE fpga;
   BYTE ifc_busy;
 }DEVICE_STATUS;
 

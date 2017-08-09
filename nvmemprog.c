@@ -325,42 +325,15 @@ void handle_ep0out(void)
 
 void handle_ep1ibn(void)
 {
-  static __bit sw_last=FALSE;
-
   __asm
-    mov	_AUTOPTRH2,#(_EP1INBUF >> 8)
-    mov	_AUTOPTRL2,#_EP1INBUF
-    mov	dptr,#_XAUTODAT2
+    mov	_AUTOPTRH1,#(_EP1INBUF >> 8)
+    mov	_AUTOPTRL1,#_EP1INBUF
   __endasm;
 
-  if((!sw_last) && GPIO_SW_STATE()){
-    __asm
-      mov	a,#0x01
-      movx	@dptr,a
-    __endasm;
-  }else{
-    __asm
-      clr	a
-      movx	@dptr,a
-    __endasm;
-  }
-  sw_last = GPIO_SW_STATE();
-
-  // XAUTODAT2 = GPIO_DCOK_STATE();
-  // XAUTODAT2 = ocprot;
-  __asm
-    mov	c,_PA4
-    clr	a
-    rlc	a
-    movx	@dptr,a
-    mov	c,_ocprot
-    clr	a
-    rlc	a
-    movx	@dptr,a
-  __endasm;
-
-  XAUTODAT2 = fpga_get_status();
-  XAUTODAT2 = ifc_busy();
+  XAUTODAT1 = GPIO_SW_STATE();
+  XAUTODAT1 = GPIO_DCOK_STATE();
+  XAUTODAT1 = ocprot;
+  XAUTODAT1 = ifc_busy();
 
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
 
