@@ -35,7 +35,7 @@
 // Vendor USB Commands
 typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_LED=0x10,               // 0=off 1=on     0=green 1=red   ---
-  CMD_FIRMWARE=0x11,          // ---            ---             FW signature
+  CMD_FW_SIGNATURE=0x11,      // ---            ---             FW signature
 #define SIGNATURE_SIZE 16
 
 

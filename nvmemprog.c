@@ -122,7 +122,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       }
       break;
 
-    case CMD_FIRMWARE:
+    case CMD_FW_SIGNATURE:
       for (i = 0; i < SETUPDAT[6]; i++) {
         EP0BUF[i] = signature[i];
       }
