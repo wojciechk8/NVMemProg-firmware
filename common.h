@@ -39,10 +39,11 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 #define SIGNATURE_SIZE 16
 
 
-  CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---
+  CMD_FPGA_START_CONFIG=0x20, // ---            FPGA config id  ---
   CMD_FPGA_WRITE_CONFIG=0x21, // ---            ---             data
-  CMD_FPGA_READ_REGS=0x22,    // ---            addr            data
-  CMD_FPGA_WRITE_REGS=0x23,   // ---            addr            data
+  CMD_FPGA_CONFIG_ID=0x22,    // ---            ---             FPGA config id
+  CMD_FPGA_READ_REGS=0x23,    // ---            addr            data
+  CMD_FPGA_WRITE_REGS=0x24,   // ---            addr            data
 
 
   CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
@@ -84,6 +85,11 @@ typedef enum{
   FPGA_STATUS_CONFIGURING,
   FPGA_STATUS_CONFIGURED
 }FPGA_CFG_STATUS;
+
+typedef enum{
+  FPGA_CONFIG_NONE=0,
+  FPGA_CONFIG_UNIVERSAL=1
+}FPGA_CONFIG_ID;
 
 /* Universal
  *

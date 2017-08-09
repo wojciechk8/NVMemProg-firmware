@@ -5,3 +5,4 @@
 - Move dscr.a51 contents to C file
 
 - Test CMD_FPGA_READ_REGS
+- Test CMD_FPGA_CONFIG_ID
