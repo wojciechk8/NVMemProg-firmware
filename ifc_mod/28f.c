@@ -91,7 +91,7 @@ void update_hiaddr(void)
   __endasm;
   for(i = 0x00; i < hiaddr_size; i++){
     lb = ((BYTE)tmp)&0x01;
-    fpga_regs.reg[XAUTODAT1] = 0x3E | lb;
+    ((FPGA_UNIV_REGISTERS*)fpga_regs)->mem_mux_selector[XAUTODAT1] = FPGA_UNIV_MUX_LOW | lb;
     tmp >>= 1;
   }
 }

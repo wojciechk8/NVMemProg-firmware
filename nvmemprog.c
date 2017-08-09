@@ -130,7 +130,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_FPGA_START_CONFIG:
-      if(!fpga_start_config()){
+      if(!fpga_start_config(SETUPDAT[4])){
         STALLEP0();
       }
       break;
