@@ -28,6 +28,12 @@
 
 extern volatile __xdata __at 0x4000 BYTE fpga_regs[64];
 
+typedef enum{
+  FPGA_STATUS_UNCONFIGURED,
+  FPGA_STATUS_CONFIGURING,
+  FPGA_STATUS_CONFIGURED
+}FPGA_CFG_STATUS;
+
 
 inline void fpga_init(void)
 {

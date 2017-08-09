@@ -81,12 +81,6 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 
 // FPGA
 typedef enum{
-  FPGA_STATUS_UNCONFIGURED,
-  FPGA_STATUS_CONFIGURING,
-  FPGA_STATUS_CONFIGURED
-}FPGA_CFG_STATUS;
-
-typedef enum{
   FPGA_CONFIG_NONE=0,
   FPGA_CONFIG_UNIVERSAL=1
 }FPGA_CONFIG_ID;
