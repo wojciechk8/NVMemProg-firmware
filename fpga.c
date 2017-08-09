@@ -26,13 +26,12 @@
 #include "fpga.h"
 
 
-volatile __xdata __at 0x4000 FPGA_REGS fpga_regs;
+volatile __xdata __at 0x4000 BYTE fpga_regs[64];
 
 static FPGA_CFG_STATUS status;
 
 
 // Altera Cyclone PS Configuration (AN 250)
-
 BOOL fpga_start_config()
 {
   BYTE timeout = 20;

@@ -26,34 +26,7 @@
 #include "common.h"
 
 
-/* FPGA registers
- *
- * mem_mux (addr 0..47):
- *   0-15: data_fx [0-15]
- *   16-24: addr_fx [0-8]
- *   25-29: ctl_fx [0-4]
- *   30: '0'
- *   31: '1'
- *   
- *   The MSB (bit 5) is output enable
- *   (the actual OE depends also on data_dir(ctl5),
- *    if selected signal is data_fx)
- *
- * rdy_fx_mux (addr 48..49):
- *   0-47: mem_pin [0:47]
- */
-typedef union{
-  struct{
-    BYTE mem_mux[48];
-    BYTE rdy_fx_mux[2];
-  };
-  BYTE reg[50];
-}FPGA_REGS;
-
-
-#define FPGA_REG_NUM sizeof(FPGA_REGS)
-extern volatile __xdata __at 0x4000 FPGA_REGS fpga_regs;
-
+extern volatile __xdata __at 0x4000 BYTE fpga_regs[64];
 
 
 inline void fpga_init(void)

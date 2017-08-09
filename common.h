@@ -84,6 +84,36 @@ typedef enum{
   FPGA_STATUS_CONFIGURED
 }FPGA_CFG_STATUS;
 
+/* Universal
+ *
+ * mem_mux_selector values (addr 0..47):
+ *   0-15: data_fx [0-15]
+ *   16-24: addr_fx [0-8]
+ *   25-29: ctl_fx [0-4]
+ *   30: '0'
+ *   31: '1'
+ *   
+ *   The MSB (bit 5) is output enable
+ *   (the actual OE depends also on data_dir(ctl_fx[5]),
+ *    if selected signal is data_fx)
+ *
+ * rdy_fx_mux_selector values (addr 48..49):
+ *   0-47: mem_pin [0:47]
+ */
+typedef struct{
+  BYTE mem_mux_selector[48];
+  BYTE rdy_fx_mux_selector[2];
+}FPGA_UNIV_REGISTERS;
+
+typedef enum{
+  FPGA_UNIV_MUX_DATA_FX = 0,
+  FPGA_UNIV_MUX_ADDR_FX = 16,
+  FPGA_UNIV_MUX_CTL_FX = 25,
+  FPGA_UNIV_MUX_LOW = 30,
+  FPGA_UNIV_MUX_HIGH = 30,
+}FPGA_UNIV_MEM_MUX_SELECTOR;
+#define FPGA_UNIV_MEM_MUX_ENABLE (1<<5)
+
 
 // Power
 typedef enum{
