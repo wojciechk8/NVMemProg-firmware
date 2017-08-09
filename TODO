@@ -3,3 +3,5 @@
   (sth like fx2lib extension).
 
 - Move dscr.a51 contents to C file
+
+- Test CMD_FPGA_READ_REGS

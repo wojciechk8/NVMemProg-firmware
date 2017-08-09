@@ -156,6 +156,21 @@ BOOL handle_vendorcommand(BYTE cmd)
       }
       break;
 
+    case CMD_FPGA_READ_REGS:
+      __asm
+        ; source
+        mov	_AUTOPTRH1,#(_fpga_regs >> 8)
+        ; destination
+        mov	_AUTOPTRH2,#(_EP0BUF >> 8)
+        mov	_AUTOPTRL2,#_EP0BUF
+      __endasm;
+      AUTOPTRL1 = SETUPDAT[4];
+      for (i = 0x00; i < SETUPDAT[2]; i++){
+        XAUTODAT2 = XAUTODAT1;
+      }
+      EP0BCL = SETUPDAT[2];
+      break;
+    
     case CMD_FPGA_WRITE_REGS:
       EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
@@ -168,7 +183,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         mov	_AUTOPTRH2,#(_fpga_regs >> 8)
       __endasm;
       AUTOPTRL2 = SETUPDAT[4];
-      for (i = 0x00; i < EP0BCL; i++){
+      for (i = 0x00; i < SETUPDAT[2]; i++){
         XAUTODAT2 = XAUTODAT1;
       }
       break;

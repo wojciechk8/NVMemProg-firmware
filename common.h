@@ -41,7 +41,8 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 
   CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---
   CMD_FPGA_WRITE_CONFIG=0x21, // ---            ---             data
-  CMD_FPGA_WRITE_REGS=0x22,   // ---            addr            data
+  CMD_FPGA_READ_REGS=0x22,    // ---            addr            data
+  CMD_FPGA_WRITE_REGS=0x23,   // ---            addr            data
 
 
   CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
