@@ -170,7 +170,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         mov	_AUTOPTRL2,#_EP0BUF
       __endasm;
       AUTOPTRL1 = SETUPDAT[4];
-      for (i = 0x00; i < SETUPDAT[2]; i++){
+      for (i = 0x00; i < SETUPDAT[6]; i++){
         XAUTODAT2 = XAUTODAT1;
       }
       EP0BCL = SETUPDAT[2];
@@ -188,7 +188,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         mov	_AUTOPTRH2,#(_fpga_regs >> 8)
       __endasm;
       AUTOPTRL2 = SETUPDAT[4];
-      for (i = 0x00; i < SETUPDAT[2]; i++){
+      for (i = 0x00; i < SETUPDAT[6]; i++){
         XAUTODAT2 = XAUTODAT1;
       }
       break;
@@ -270,8 +270,8 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_EEPROM_READ:
-      if(eeprom_read(EEPROM_ADDR, SETUP_INDEX(), SETUPDAT[2], EP0BUF)){
-        EP0BCL = SETUPDAT[2];
+      if(eeprom_read(EEPROM_ADDR, SETUP_INDEX(), SETUPDAT[6], EP0BUF)){
+        EP0BCL = SETUPDAT[6];
       }else{
         STALLEP0();
       }

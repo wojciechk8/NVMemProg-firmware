@@ -31,7 +31,7 @@
 #define SYNCDELAY SYNCDELAY3
 
 
-const char signature[SIGNATURE_SIZE] = "28f";
+const char signature[SIGNATURE_SIZE] = "mbm27c";
 
 enum MEMORY_CMD{
   CMD_AUTO_ERASE_CHIP=0x30,
@@ -105,7 +105,7 @@ void update_hiaddr(void)
   __endasm;
   for(i = 0x00; i < hiaddr_size; i++){
     lb = ((BYTE)tmp)&0x01;
-    ((FPGA_UNIV_REGISTERS*)fpga_regs)->mem_mux_selector[XAUTODAT1] = FPGA_UNIV_MUX_LOW | lb;
+    ((FPGA_UNIV_REGISTERS*)fpga_regs)->mem_mux_selector[XAUTODAT1] = FPGA_UNIV_MUX_ENABLE | FPGA_UNIV_MUX_LOW | lb;
     tmp >>= 1;
   }
 }
