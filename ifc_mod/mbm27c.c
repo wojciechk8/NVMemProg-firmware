@@ -259,7 +259,7 @@ BOOL ifc_prepare_write(void)
 BOOL ifc_busy(void)
 {
   return (state != STATE_IDLE)
-         && ((state != STATE_WRITE_DATA) || !(EP24FIFOFLGS & bmBIT1));
+         && ((state != STATE_WRITE_DATA) || !(EP2468STAT & bmEP2EMPTY));
 }
 
 
@@ -274,7 +274,7 @@ void ifc_abort(void)
 
   // Reset high bits of the address
   hiaddr = 0x0000;
-  update_hiaddr();
+  //update_hiaddr();
 
   // Switch FIFOs to manual mode
   FIFORESET = bmNAKALL; SYNCDELAY;
@@ -308,9 +308,9 @@ void ifc_process(void)
     case STATE_WRITE_DATA:
       switch (write_state) {
         case WRITE_STATE_IDLE:
-          if(EP24FIFOFLGS & bmBIT1) // if EP2FIFO empty
+          if(EP2468STAT & bmEP2EMPTY)
             break;
-            
+          
           SYNCDELAY;
           FIFORESET = bmNAKALL; SYNCDELAY; // nak all OUT pkts. from host
           FIFORESET = 0x82;     SYNCDELAY; // advance all EP2 buffers to cpu domain
@@ -329,7 +329,7 @@ void ifc_process(void)
           TH0 = 0; TL0 = 0;
           TF0 = 0;  // clear overflow flag
           TR0 = 1;  // start timer
-          state = WRITE_STATE_PGM_PULSE;
+          write_state = WRITE_STATE_PGM_PULSE;
           break;
         
         case WRITE_STATE_PGM_PULSE:
@@ -339,7 +339,7 @@ void ifc_process(void)
             while(!(GPIFTRIG & bmBIT7)) // wait for the end of waveform
               ;
             delay_us (45);
-            state = WRITE_STATE_VERIFY;
+            write_state = WRITE_STATE_VERIFY;
           }
           break;
         
@@ -349,8 +349,9 @@ void ifc_process(void)
             ;
           ver_byte = GPIFSGLDATLNOX;
           
+          verify_cnt++;
           if((ver_byte == EP2FIFOBUF[write_byte_cnt])  // verified ok
-             || (++verify_cnt == 10)){
+             || (verify_cnt == 10)){
             GPIFREADYCFG = 0x40;                        // IntRdy = 0
             GPIFSGLDATLX = EP2FIFOBUF[write_byte_cnt];  // start writing a byte from FIFO
             // Timer
@@ -372,13 +373,13 @@ void ifc_process(void)
                 ;
               
               gpif_addr++;
-              if(*((BYTE*)(&gpif_addr+1)) == 2){  // gpif_addr == 0x200
+              if(*(((BYTE*)(&gpif_addr))+1) == 2){  // gpif_addr == 0x200
                 gpif_addr = 0;
                 hiaddr++;
                 update_hiaddr();
               }
               
-              GPIFADRH = *((BYTE*)(&gpif_addr+1)); SYNCDELAY;
+              GPIFADRH = *(((BYTE*)(&gpif_addr))+1); SYNCDELAY;
               GPIFADRL = *((BYTE*)(&gpif_addr));   SYNCDELAY;
               
               if(++write_byte_cnt == ep_byte_cnt){
