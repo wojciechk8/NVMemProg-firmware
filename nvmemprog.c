@@ -338,11 +338,6 @@ BOOL handle_vendorcommand(BYTE cmd)
 // ENDPOINT HANDLERS
 //******************************************************************************
 
-void handle_ep0out(void)
-{
-  
-}
-
 void handle_ep1ibn(void)
 {
   __asm
