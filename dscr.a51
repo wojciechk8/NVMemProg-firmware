@@ -121,7 +121,7 @@ highspd_dscr_end:
 	.db	ENDPOINT_TYPE_INT	; type
 	.db	0x00				; max packet LSB
 	.db	0x02				; max packet size=512 bytes
-	.db	0xA0				; polling interval (20ms)
+	.db	0x08				; polling interval (16ms)
 
 ; endpoint 2 out
 	.db	DSCR_ENDPOINT_LEN
