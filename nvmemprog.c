@@ -130,7 +130,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_FPGA_START_CONFIG:
-      if(!fpga_start_config(SETUPDAT[4])){
+      if(!fpga_start_config()){
         STALLEP0();
       }
       break;
@@ -154,11 +154,6 @@ BOOL handle_vendorcommand(BYTE cmd)
           break;
         }
       }
-      break;
-    
-    case CMD_FPGA_CONFIG_ID:
-      EP0BUF[0] = fpga_get_config_id();
-      EP0BCL = 1;
       break;
 
     case CMD_FPGA_READ_REGS:

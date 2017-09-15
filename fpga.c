@@ -28,12 +28,11 @@
 
 volatile __xdata __at 0x4000 BYTE fpga_regs[64];
 
-__xdata FPGA_CONFIG_ID config_id;
 __xdata FPGA_CFG_STATUS status;
 
 
 // Altera Cyclone PS Configuration (AN 250)
-BOOL fpga_start_config(FPGA_CONFIG_ID id)
+BOOL fpga_start_config()
 {
   BYTE timeout = 20;
 
@@ -51,7 +50,6 @@ BOOL fpga_start_config(FPGA_CONFIG_ID id)
     }
   }
 
-  config_id = id;
   status = FPGA_STATUS_CONFIGURING;
   return TRUE;
 }
@@ -79,11 +77,6 @@ BOOL fpga_write_config(BYTE len)
   return TRUE;
 }
 
-
-FPGA_CONFIG_ID fpga_get_config_id(void)
-{
-  return status == FPGA_STATUS_CONFIGURED ? config_id : FPGA_CONFIG_NONE;
-}
 
 FPGA_CFG_STATUS fpga_get_status(void)
 {
