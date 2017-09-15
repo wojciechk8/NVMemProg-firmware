@@ -156,6 +156,11 @@ BOOL handle_vendorcommand(BYTE cmd)
       }
       break;
 
+    case CMD_FPGA_GET_STATUS:
+      EP0BUF[0] = fpga_get_status();
+      EP0BCL = 1;
+      break;
+
     case CMD_FPGA_READ_REGS:
       __asm
         ; source

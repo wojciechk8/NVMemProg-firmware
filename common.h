@@ -41,8 +41,9 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 
   CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---
   CMD_FPGA_WRITE_CONFIG=0x21, // ---            ---             data
-  CMD_FPGA_READ_REGS=0x22,    // ---            addr            data
-  CMD_FPGA_WRITE_REGS=0x23,   // ---            addr            data
+  CMD_FPGA_GET_STATUS=0x22,   // ---            ---             status
+  CMD_FPGA_READ_REGS=0x23,    // ---            addr            data
+  CMD_FPGA_WRITE_REGS=0x24,   // ---            addr            data
 
 
   CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
@@ -79,6 +80,12 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 
 
 // FPGA
+
+typedef enum{
+  FPGA_STATUS_UNCONFIGURED,
+  FPGA_STATUS_CONFIGURING,
+  FPGA_STATUS_CONFIGURED
+}FPGA_CFG_STATUS;
 
 /* Universal
  *
