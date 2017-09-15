@@ -48,33 +48,33 @@ BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param)
 {
   type;
   param;
-  return TRUE;
+  return FALSE;
 }
 
 
-BOOL ifc_read_id(BYTE size, BYTE *id)
+BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
 {
-  size;
+  type;
   id;
-  return TRUE;
+  return FALSE;
 }
 
 
 BOOL ifc_erase_chip(void)
 {
-  return TRUE;
+  return FALSE;
 }
 
 
 BOOL ifc_prepare_read(void)
 {
-  return TRUE;
+  return FALSE;
 }
 
 
 BOOL ifc_prepare_write(void)
 {
-  return TRUE;
+  return FALSE;
 }
 
 
