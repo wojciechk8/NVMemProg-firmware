@@ -7,3 +7,5 @@
 - Test CMD_FPGA_READ_REGS
 
 - MBM27C interface requires VPP=21V, so support for an adapter with DC/DC converter should be added
+
+- Test CMD_DRIVER_READ_ID

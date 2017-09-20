@@ -32,14 +32,14 @@
 static __bit configured = 0;
 
 
-BOOL driver_read_id(BYTE *id)
+BOOL driver_read_id(BYTE *id, BYTE len)
 {
   BYTE mem_addr = 0;
 
   if(!i2c_write(ID_EEPROM_ADDR, 1, &mem_addr, 0, NULL)){
     return FALSE;
   }
-  if(!i2c_read(ID_EEPROM_ADDR, 1, id)){
+  if(!i2c_read(ID_EEPROM_ADDR, len, id)){
     return FALSE;
   }
 

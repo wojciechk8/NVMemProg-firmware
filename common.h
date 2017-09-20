@@ -48,7 +48,7 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 
   CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
                               // else dis.
-  CMD_DRIVER_READ_ID=0x31,    // ---            ---             driver id
+  CMD_DRIVER_READ_ID=0x31,    // ---            ---             driver id data
   CMD_DRIVER_CONFIG=0x32,     // ---            ---             data
 
 
@@ -63,7 +63,7 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_PWR_SW_STATE=0x4F,      // ---            ---             pwr_sw state
 
 
-  CMD_EEPROM_READ=0x50,       // length         addr            data
+  CMD_EEPROM_READ=0x50,       // ---            addr            data
   CMD_EEPROM_WRITE=0x51,      // ---            addr            data
   
   

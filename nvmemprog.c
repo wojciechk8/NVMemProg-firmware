@@ -204,7 +204,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_DRIVER_READ_ID:
-      if(!driver_read_id(EP0BUF)){
+      if(!driver_read_id(EP0BUF, SETUPDAT[6])){
         STALLEP0();
       }
       EP0BCL=1;
@@ -281,7 +281,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
-      if(!eeprom_write(EEPROM_ADDR, SETUP_INDEX(), EP0BCL, EP0BUF)){
+      if(!eeprom_write(EEPROM_ADDR, SETUP_INDEX(), SETUPDAT[6], EP0BUF)){
         STALLEP0();
       }
       break;
