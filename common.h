@@ -49,7 +49,8 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
                               // else dis.
   CMD_DRIVER_READ_ID=0x31,    // ---            ---             driver id data
-  CMD_DRIVER_CONFIG=0x32,     // ---            ---             data
+  CMD_DRIVER_WRITE_ID=0x32,   // ---            ---             driver id data
+  CMD_DRIVER_CONFIG=0x33,     // ---            ---             data
 
 
   CMD_PWR_SET_DAC=0x40,       // raw value      LSB: DAC channel, ---

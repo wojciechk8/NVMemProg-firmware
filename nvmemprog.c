@@ -210,6 +210,15 @@ BOOL handle_vendorcommand(BYTE cmd)
       EP0BCL=1;
       break;
 
+    case CMD_DRIVER_WRITE_ID:
+      EP0BCL = 0; SYNCDELAY;    // arm EP0
+      while (EP0CS & bmEPBUSY)  // wait for OUT data
+        ;
+      if(!driver_write_id(EP0BUF, SETUPDAT[6])){
+        STALLEP0();
+      }
+      break;
+
     case CMD_DRIVER_CONFIG:
       EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data

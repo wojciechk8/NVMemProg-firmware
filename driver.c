@@ -46,6 +46,17 @@ BOOL driver_read_id(BYTE *id, BYTE len)
   return TRUE;
 }
 
+BOOL driver_write_id(BYTE *id, BYTE len)
+{
+  BYTE mem_addr = 0;
+
+  if(!i2c_write(ID_EEPROM_ADDR, 1, &mem_addr, len, id)){
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
 
 // Data pointed by the autopointer 1
 BOOL driver_write_config(BYTE len)

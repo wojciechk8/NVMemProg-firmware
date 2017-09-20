@@ -36,6 +36,7 @@ inline void driver_init(void)
 
 
 BOOL driver_read_id(BYTE *id, BYTE len);
+BOOL driver_write_id(BYTE *id, BYTE len);
 BOOL driver_write_config(BYTE len); // Data pointed by the autopointer 1
 BOOL driver_enable(void); // Enabling allowed only after configuration.
 void driver_disable(void);
