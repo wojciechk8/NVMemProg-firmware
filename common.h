@@ -26,7 +26,6 @@
 #define PID 0x4801
 
 #ifndef SDCC
-  #define DEVICE_STATUS_SIZE sizeof (DEVICE_STATUS)
   typedef unsigned char BYTE;
   typedef unsigned short WORD;
 #endif
