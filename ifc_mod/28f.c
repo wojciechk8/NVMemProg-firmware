@@ -96,6 +96,17 @@ void update_hiaddr(void)
   }
 }
 
+void reset_memory_device(void)
+{
+  // Reset memory command
+  GPIFSGLDATLX = CMD_RESET;
+  while(!(GPIFTRIG & bmBIT7))
+    ;
+  GPIFSGLDATLX = CMD_RESET;
+  while(!(GPIFTRIG & bmBIT7))
+    ;
+}
+
 /*
 BOOL poll_dq7(void)
 {
@@ -203,6 +214,8 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
     return FALSE;
   }
   
+  reset_memory_device();
+  
   switch (type) {
     case IFC_ID_MANUFACTURER:
       GPIFADRL = 0x00; SYNCDELAY;
@@ -234,6 +247,8 @@ BOOL ifc_erase_chip(void)
   if(state != STATE_IDLE){
     return FALSE;
   }
+  
+  reset_memory_device();
 
   GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
   while(!(GPIFTRIG & bmBIT7))
@@ -253,6 +268,8 @@ BOOL ifc_prepare_read(void)
   if(state != STATE_IDLE){
     return FALSE;
   }
+  
+  reset_memory_device();
 
   // Init Transaction Counter to 512B
   GPIFTCB1 = 0x02;       SYNCDELAY;
@@ -280,6 +297,8 @@ BOOL ifc_prepare_write(void)
   if(state != STATE_IDLE){
     return FALSE;
   }
+  
+  reset_memory_device();
 
   // Init Transaction Counter
   GPIFTCB1 = 0x00;       SYNCDELAY;
@@ -330,14 +349,6 @@ void ifc_abort(void)
   // Reset high bits of the address
   hiaddr = 0x0000;
   update_hiaddr();
-
-  // Reset memory command
-  GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
-  GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
 
   // Switch FIFOs to manual mode
   FIFORESET = bmNAKALL; SYNCDELAY;
