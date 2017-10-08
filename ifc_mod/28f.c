@@ -96,9 +96,8 @@ void update_hiaddr(void)
   }
 }
 
-void reset_memory_device(void)
+void reset_memory_command(void)
 {
-  // Reset memory command
   GPIFSGLDATLX = CMD_RESET;
   while(!(GPIFTRIG & bmBIT7))
     ;
@@ -214,8 +213,6 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
     return FALSE;
   }
   
-  reset_memory_device();
-  
   switch (type) {
     case IFC_ID_MANUFACTURER:
       GPIFADRL = 0x00; SYNCDELAY;
@@ -226,10 +223,6 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
     default:
       return FALSE;
   }
-
-  GPIFSGLDATLX = CMD_READ_ID;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
   
   dummy = GPIFSGLDATLX;  // trigger read sequence
   while(!(GPIFTRIG & bmBIT7))
@@ -248,7 +241,7 @@ BOOL ifc_erase_chip(void)
     return FALSE;
   }
   
-  reset_memory_device();
+  reset_memory_command();
 
   GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
   while(!(GPIFTRIG & bmBIT7))
@@ -268,8 +261,6 @@ BOOL ifc_prepare_read(void)
   if(state != STATE_IDLE){
     return FALSE;
   }
-  
-  reset_memory_device();
 
   // Init Transaction Counter to 512B
   GPIFTCB1 = 0x02;       SYNCDELAY;
@@ -298,7 +289,7 @@ BOOL ifc_prepare_write(void)
     return FALSE;
   }
   
-  reset_memory_device();
+  reset_memory_command();
 
   // Init Transaction Counter
   GPIFTCB1 = 0x00;       SYNCDELAY;
