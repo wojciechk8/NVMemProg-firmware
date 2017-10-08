@@ -43,8 +43,8 @@
 
 
 volatile __bit ocprot = FALSE;
-volatile __bit dosud = FALSE;
-volatile __bit doep0out = FALSE;
+volatile __bit do_ocprot = FALSE;
+volatile __bit do_sud = FALSE;
 volatile enum EP0State{
   EP0STATE_
 }ep0out_state;
@@ -397,7 +397,7 @@ void device_init(void)
 
 void sudav_isr() __interrupt SUDAV_ISR
 {
-  dosud = TRUE;
+  do_sud = TRUE;
   CLEAR_SUDAV();
 }
 
@@ -425,11 +425,7 @@ void ibn_isr() __interrupt IBN_ISR
 
 void ie1_isr() __interrupt IE1_ISR
 {
-  pwr_reset();
-  driver_disable();
-  ifc_abort();
-  GPIO_LEDR_ON();
-  ocprot = 1;
+  do_ocprot = 1;
 }
 
 
@@ -461,9 +457,18 @@ void main()
   while(TRUE){
     ifc_process();
 
-    if(dosud){
-      dosud=FALSE;
+    if(do_sud){
+      do_sud = FALSE;
       handle_setupdata();
+    }
+
+    if(do_ocprot){
+      do_ocprot = FALSE;
+      pwr_reset();
+      driver_reset();
+      ifc_abort();
+      GPIO_LEDR_ON();
+      ocprot = 1;
     }
   }
 }
