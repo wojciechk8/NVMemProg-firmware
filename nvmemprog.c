@@ -258,8 +258,12 @@ BOOL handle_vendorcommand(BYTE cmd)
         EX1 = 0;
         pwr_switch_off();
         delay_us(10);
+        IE1 = 0;
         EX1 = 1;
+        GPIO_LEDG_ON();
+        GPIO_LEDR_OFF();
       }else if(SETUPDAT[2] == 0x01){
+        GPIO_LEDG_OFF();
         GPIO_LEDR_OFF();
         pwr_switch_on();
       }else{
@@ -446,6 +450,7 @@ void main()
   IBNIE = bmEP1IBN;
   NAKIE = bmIBN;
   // OCPROT# external interrupt on falling edge
+  IE1 = 0;  // clear int flag
   EX1 = 1;
   IT1 = 1;
 
@@ -453,6 +458,8 @@ void main()
   EA=1;
 
   RENUMERATE();
+  
+  GPIO_LEDG_ON();
 
   while(TRUE){
     ifc_process();
