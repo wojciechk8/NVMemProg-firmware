@@ -207,7 +207,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       if(!driver_read_id(EP0BUF, SETUPDAT[6])){
         STALLEP0();
       }
-      EP0BCL=1;
+      EP0BCL = 1;
       break;
 
     case CMD_DRIVER_WRITE_ID:
@@ -450,7 +450,7 @@ void main()
   IT1 = 1;
 
   // Enable interrupts
-  EA=1;
+  EA = 1;
 
   RENUMERATE();
   
