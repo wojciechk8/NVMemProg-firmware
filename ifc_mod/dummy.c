@@ -24,7 +24,7 @@
 #include "module.h"
 
 
-const char signature[SIGNATURE_SIZE] = "dummy";
+const char fw_signature[FW_SIGNATURE_SIZE] = "dummy";
 
 
 //******************************************************************************

@@ -124,9 +124,9 @@ BOOL handle_vendorcommand(BYTE cmd)
 
     case CMD_FW_SIGNATURE:
       for (i = 0; i < SETUPDAT[6]; i++) {
-        EP0BUF[i] = signature[i];
+        EP0BUF[i] = fw_signature[i];
       }
-      EP0BCL = SIGNATURE_SIZE;
+      EP0BCL = FW_SIGNATURE_SIZE;
       break;
 
     case CMD_FPGA_START_CONFIG:

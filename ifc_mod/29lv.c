@@ -29,7 +29,7 @@
 #define SYNCDELAY SYNCDELAY3
 
 
-const char signature[SIGNATURE_SIZE] = "29lv";
+const char fw_signature[FW_SIGNATURE_SIZE] = "29lv";
 
 enum MEMORY_CMD{
   CMD_UNLOCK1=0xAA,

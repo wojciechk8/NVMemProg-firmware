@@ -36,7 +36,7 @@
 typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_LED=0x10,               // 0=off 1=on     0=green 1=red   ---
   CMD_FW_SIGNATURE=0x11,      // ---            ---             FW signature
-#define SIGNATURE_SIZE 16
+#define FW_SIGNATURE_SIZE 16
 
 
   CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---
