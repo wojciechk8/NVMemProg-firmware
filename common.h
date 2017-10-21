@@ -46,11 +46,12 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_FPGA_WRITE_REGS=0x24,   // ---            addr            data
 
 
-  CMD_DRIVER_ENABLE=0x30,     // 0xA5=en.       ---             ---
+  CMD_DRIVER_READ_ID=0x30,    // ---            ---             driver id data
+  CMD_DRIVER_WRITE_ID=0x31,   // ---            ---             driver id data
+  CMD_DRIVER_CONFIG=0x32,     // ---            ---             data
+  CMD_DRIVER_CONFIG_PIN=0x33, // pin_cfg        pin_num         ---
+  CMD_DRIVER_ENABLE=0x34,     // 0xA5=en.       ---             ---
                               // else dis.
-  CMD_DRIVER_READ_ID=0x31,    // ---            ---             driver id data
-  CMD_DRIVER_WRITE_ID=0x32,   // ---            ---             driver id data
-  CMD_DRIVER_CONFIG=0x33,     // ---            ---             data
 
 
   CMD_PWR_SET_DAC=0x40,       // raw value      LSB: DAC channel, ---
@@ -134,42 +135,17 @@ typedef enum{
 }DRIVER_ID;
 
 typedef enum{
-  DRIVER_DEFAULT_PIN_CONFIG_IO=0x0,
-  DRIVER_DEFAULT_PIN_CONFIG_GND=0x1,
-  DRIVER_DEFAULT_PIN_CONFIG_VCC=0x2,
-  DRIVER_DEFAULT_PIN_CONFIG_VPP=0x3
-}DRIVER_DEFAULT_PIN_CONFIG;
-#define DRIVER_DEFAULT_PIN_CONFIG_PULL_UP_ENABLE 0x0
-#define DRIVER_DEFAULT_PIN_CONFIG_PULL_UP_DISABLE 0x4
+  DRIVER_PIN_CONFIG_IO=0x0,
+  DRIVER_PIN_CONFIG_GND=0x1,
+  DRIVER_PIN_CONFIG_VCC=0x2,
+  DRIVER_PIN_CONFIG_VPP=0x3
+}DRIVER_PIN_CONFIG;
+#define DRIVER_PIN_CONFIG_PULL_UP_ENABLE 0x0
+#define DRIVER_PIN_CONFIG_PULL_UP_DISABLE 0x4
 
 typedef struct{
-  BYTE pin[48];
-}DRIVER_DEFAULT_CONFIG;
-
-typedef struct{
-  BYTE data[18];
-}DRIVER_DEFAULT_CONFIG_SERIALIZED;
-
-#define DRIVER_DEFAULT_SERIALIZE_CONFIG(in, out)                       \
-  do{                                                                  \
-    DWORD out_buf = 0;                                                 \
-    int out_cnt = 0;                                                   \
-    for(int i = 48; i != 0; i--){                                      \
-      BYTE in_buf = in->pin[i-1];                                      \
-      out_buf >>= 1;                                                   \
-      out_buf |= (in_buf&0x4) ? 0x800000 : 0x000000;                   \
-      in_buf <<= 1; out_buf >>= 1;                                     \
-      out_buf |= (in_buf&0x4) ? 0x800000 : 0x000000;                   \
-      in_buf <<= 1; out_buf >>= 1;                                     \
-      out_buf |= (in_buf&0x4) ? 0x800000 : 0x000000;                   \
-      if(((i-1) % 8) == 0){                                            \
-        out->data[out_cnt++] = out_buf&0x0000FF;                       \
-        out->data[out_cnt++] = (out_buf&0x00FF00)>>8;                  \
-        out->data[out_cnt++] = (out_buf&0xFF0000)>>16;                 \
-        out_buf = 0;                                                   \
-      }                                                                \
-    }                                                                  \
-  }while(0)                                                            \
+  BYTE pin_config[48];
+}DRIVER_CONFIG;
 
 
 // EEPROM
@@ -196,8 +172,8 @@ typedef struct{
 
 
 // Memory Interface
-typedef enum{
-  IFC_CFG_ADDRESS_MAPPING
+typedef enum{                 // What is configured:
+  IFC_CFG_ADDRESS_MAPPING,// pin numbers of high address lines (>= A9)
 }IFC_CFG_TYPE;
 
 typedef enum{

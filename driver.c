@@ -22,14 +22,10 @@
 #include <i2c.h>
 #include <fx2types.h>
 
-#include "gpio.h"
 #include "driver.h"
 
 
 #define ID_EEPROM_ADDR 0x57
-
-
-static __bit configured = 0;
 
 
 BOOL driver_read_id(BYTE *id, BYTE len)
@@ -55,54 +51,4 @@ BOOL driver_write_id(BYTE *id, BYTE len)
   }
 
   return TRUE;
-}
-
-
-// Data pointed by the autopointer 1
-BOOL driver_write_config(BYTE len)
-{
-  BYTE temp;
-  
-  if(GPIO_DRIVER_EN_STATE()){
-    return FALSE;
-  }
-
-  // Set cpu frequency to 12MHz, so that serial baud is limited to 1MHz
-  temp = CPUCS;
-  CPUCS = (temp & ~bmCLKSPD);
-  while(len--){
-    while(!TI1)
-      ;
-    TI1 = 0;
-    SBUF1 = XAUTODAT1;
-  }
-  CPUCS = temp;
-
-  configured = TRUE;
-  return TRUE;
-}
-
-
-// Enabling allowed only after configuration.
-BOOL driver_enable(void)
-{
-  if(!configured){
-    return FALSE;
-  }
-
-  GPIO_DRIVER_EN_SET();
-
-  return TRUE;
-}
-
-
-void driver_disable(void)
-{
-  GPIO_DRIVER_EN_UNSET();
-}
-
-
-void driver_reset_status(void)
-{
-  configured = 0;
 }

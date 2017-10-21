@@ -223,12 +223,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       EP0BCL = 0; SYNCDELAY;    // arm EP0
       while (EP0CS & bmEPBUSY)  // wait for OUT data
         ;
-      __asm
-        ; source
-        mov	_AUTOPTRH1,#(_EP0BUF >> 8)
-        mov	_AUTOPTRL1,#_EP0BUF
-      __endasm;
-      if(!driver_write_config(EP0BCL)){
+      if(!driver_config((DRIVER_CONFIG*)EP0BUF)){
         STALLEP0();
       }
       break;
@@ -472,7 +467,7 @@ void main()
     if(do_ocprot){
       do_ocprot = FALSE;
       pwr_reset();
-      driver_reset();
+      driver_disable();
       ifc_abort();
       GPIO_LEDR_ON();
       ocprot = 1;

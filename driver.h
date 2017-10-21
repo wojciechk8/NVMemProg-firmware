@@ -24,20 +24,13 @@
 #include <fx2types.h>
 
 #include "gpio.h"
+#include "common.h"
 
 
-inline void driver_init(void)
-{
-  GPIO_DRIVER_EN_UNSET();
-
-  // Serial1 mode 0, CLKOUT/12
-  SCON1 = bmBIT1;   // TI = 1
-}
-
-
+void driver_init(void);
 BOOL driver_read_id(BYTE *id, BYTE len);
 BOOL driver_write_id(BYTE *id, BYTE len);
-BOOL driver_write_config(BYTE len); // Data pointed by the autopointer 1
-BOOL driver_enable(void); // Enabling allowed only after configuration.
+BOOL driver_config(DRIVER_CONFIG* config);
+BOOL driver_config_pin(BYTE pin_num, DRIVER_PIN_CONFIG pin_cfg);
+BOOL driver_enable(void);
 void driver_disable(void);
-void driver_reset_status(void);
