@@ -424,7 +424,7 @@ void ibn_isr() __interrupt IBN_ISR
 
 void ie1_isr() __interrupt IE1_ISR
 {
-  do_ocprot = 1;
+  do_ocprot = TRUE;
 }
 
 
@@ -470,7 +470,7 @@ void main()
       driver_disable();
       ifc_abort();
       GPIO_LEDR_ON();
-      ocprot = 1;
+      ocprot = TRUE;
     }
   }
 }
