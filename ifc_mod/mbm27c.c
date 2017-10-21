@@ -348,7 +348,7 @@ void ifc_process(void)
           break;
         
         case WRITE_STATE_VERIFY_PGM_PULSE:
-          if(TF0){
+          if(TF0){  // 2ms elapsed since last overflow
             if(!(--verify_cnt)){          // verify_cnt * 2ms elapsed
               TR0 = 0;                    // stop timer
               GPIFREADYCFG = 0xC0;        // IntRdy = 1
@@ -374,8 +374,7 @@ void ifc_process(void)
                 write_state = WRITE_STATE_PROGRAM;
               }
             }
-          } else {
-            TF0 = 0;  // clear overflow flag
+            TF0 = 0;  // clear overflow flag and wait another 2ms
           }
           break;
       }
