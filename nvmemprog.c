@@ -445,9 +445,9 @@ void main()
   IBNIE = bmEP1IBN;
   NAKIE = bmIBN;
   // OCPROT# external interrupt on falling edge
-  IE1 = 0;  // clear int flag
-  EX1 = 1;
-  IT1 = 1;
+  IT1 = 1;  // falling edge
+  IE1 = 0;  // clear int1 flag
+  EX1 = 1;  // enable int1
 
   // Enable interrupts
   EA = 1;
