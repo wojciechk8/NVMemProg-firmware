@@ -23,6 +23,7 @@
 #include <fx2types.h>
 #include <fx2macros.h>
 
+#include "delay_us.h"
 #include "gpio.h"
 #include "power.h"
 
@@ -223,15 +224,15 @@ BOOL pwr_reset(void)
 
 void pwr_switch_off(void)
 {
-  GPIO_PWRSW_CLK_UNSET();
-  GPIO_PWRSW_D_UNSET();
+  GPIO_PWRSW_CLK_UNSET(); SYNCDELAY;
+  GPIO_PWRSW_D_UNSET(); SYNCDELAY;
   GPIO_PWRSW_CLK_SET();
 }
 
 
 void pwr_switch_on(void)
 {
-  GPIO_PWRSW_CLK_UNSET();
-  GPIO_PWRSW_D_SET();
+  GPIO_PWRSW_CLK_UNSET(); SYNCDELAY;
+  GPIO_PWRSW_D_SET(); SYNCDELAY;
   GPIO_PWRSW_CLK_SET();
 }
