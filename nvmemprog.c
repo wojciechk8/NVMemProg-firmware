@@ -175,16 +175,6 @@ BOOL handle_vendorcommand(BYTE cmd)
       }
       break;
 
-    case CMD_DRIVER_ENABLE:
-      if(SETUP_VALUE_LSB() == 0xA5){
-        if(!driver_enable()){
-          STALLEP0();
-        }
-      }else{
-        driver_disable();
-      }
-      break;
-
     case CMD_DRIVER_READ_ID:
       if(!driver_read_id(EP0BUF, SETUP_LENGTH_LSB())){
         STALLEP0();
@@ -205,6 +195,22 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }else if(!driver_config((DRIVER_CONFIG*)EP0BUF)){
         STALLEP0();
+      }
+      break;
+    
+    case CMD_DRIVER_CONFIG_PIN:
+      if(!driver_config_pin(SETUP_INDEX_LSB(), SETUP_VALUE_LSB())){
+        STALLEP0();
+      }
+      break;
+    
+    case CMD_DRIVER_ENABLE:
+      if(SETUP_VALUE_LSB() == 0xA5){
+        if(!driver_enable()){
+          STALLEP0();
+        }
+      }else{
+        driver_disable();
       }
       break;
 
