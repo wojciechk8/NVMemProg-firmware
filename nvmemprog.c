@@ -33,6 +33,7 @@
 #include "fpga.h"
 #include "gpio.h"
 #include "delay_us.h"
+#include "utils.h"
 #include "common.h"
 #include "ifc_mod/module.h"
 
@@ -115,18 +116,18 @@ BOOL handle_vendorcommand(BYTE cmd)
   
   switch((VENDOR_CMD)cmd){
     case CMD_LED:
-      if(SETUPDAT[4] == 0){       // wIndex
-        GPIO_LEDG = SETUPDAT[2];  // wValue
-      }else if(SETUPDAT[4] == 1){
-        GPIO_LEDR = SETUPDAT[2];
+      if(SETUP_INDEX_LSB() == 0){
+        GPIO_LEDG = SETUP_VALUE_LSB();
+      }else if(SETUP_INDEX_LSB() == 1){
+        GPIO_LEDR = SETUP_VALUE_LSB();
       }
       break;
 
     case CMD_FW_SIGNATURE:
-      for (i = 0; i < SETUPDAT[6]; i++) {
+      for (i = 0; i < SETUP_LENGTH_LSB(); i++) {
         EP0BUF[i] = fw_signature[i];
       }
-      EP0BCL = FW_SIGNATURE_SIZE;
+      EP0BCL = SETUP_LENGTH_LSB();
       break;
 
     case CMD_FPGA_START_CONFIG:
@@ -140,16 +141,9 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       for(cnt = SETUP_LENGTH(); cnt; cnt -= EP0BCL){
-        EP0BCL = 0; SYNCDELAY;    // arm EP0
-        while (EP0CS & bmEPBUSY)  // wait for OUT data
-          ;
-        __asm
-          ; source
-          mov	_AUTOPTRH1,#(_EP0BUF >> 8)
-          mov	_AUTOPTRL1,#_EP0BUF
-        __endasm;
-        fpga_write_config(EP0BCL);
-        if(fpga_get_status() == FPGA_STATUS_UNCONFIGURED){
+        WAIT_FOR_EP0_DATA();
+        LOAD_AUTOPTR1(EP0BUF);
+        if(!fpga_write_config(EP0BCL)){
           STALLEP0();
           break;
         }
@@ -162,39 +156,27 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_FPGA_READ_REGS:
-      __asm
-        ; source
-        mov	_AUTOPTRH1,#(_fpga_regs >> 8)
-        ; destination
-        mov	_AUTOPTRH2,#(_EP0BUF >> 8)
-        mov	_AUTOPTRL2,#_EP0BUF
-      __endasm;
-      AUTOPTRL1 = SETUPDAT[4];
-      for (i = 0x00; i < SETUPDAT[6]; i++){
+      LOAD_AUTOPTR1(fpga_regs);
+      LOAD_AUTOPTR2(EP0BUF);
+      AUTOPTRL1 = SETUP_INDEX_LSB();
+      for (i = 0x00; i < SETUP_LENGTH_LSB(); i++){
         XAUTODAT2 = XAUTODAT1;
       }
-      EP0BCL = SETUPDAT[2];
+      EP0BCL = SETUP_LENGTH_LSB();
       break;
     
     case CMD_FPGA_WRITE_REGS:
-      EP0BCL = 0; SYNCDELAY;    // arm EP0
-      while (EP0CS & bmEPBUSY)  // wait for OUT data
-        ;
-      __asm
-        ; source
-        mov	_AUTOPTRH1,#(_EP0BUF >> 8)
-        mov	_AUTOPTRL1,#_EP0BUF
-        ; destination
-        mov	_AUTOPTRH2,#(_fpga_regs >> 8)
-      __endasm;
-      AUTOPTRL2 = SETUPDAT[4];
-      for (i = 0x00; i < SETUPDAT[6]; i++){
+      WAIT_FOR_EP0_DATA();
+      LOAD_AUTOPTR1(EP0BUF);
+      LOAD_AUTOPTR2(fpga_regs);
+      AUTOPTRL2 = SETUP_INDEX_LSB();
+      for (i = 0x00; i < SETUP_LENGTH_LSB(); i++){
         XAUTODAT2 = XAUTODAT1;
       }
       break;
 
     case CMD_DRIVER_ENABLE:
-      if(SETUPDAT[2] == 0xA5){
+      if(SETUP_VALUE_LSB() == 0xA5){
         if(!driver_enable()){
           STALLEP0();
         }
@@ -204,51 +186,49 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_DRIVER_READ_ID:
-      if(!driver_read_id(EP0BUF, SETUPDAT[6])){
+      if(!driver_read_id(EP0BUF, SETUP_LENGTH_LSB())){
         STALLEP0();
       }
-      EP0BCL = 1;
+      EP0BCL = SETUP_LENGTH_LSB();
       break;
 
     case CMD_DRIVER_WRITE_ID:
-      EP0BCL = 0; SYNCDELAY;    // arm EP0
-      while (EP0CS & bmEPBUSY)  // wait for OUT data
-        ;
-      if(!driver_write_id(EP0BUF, SETUPDAT[6])){
+      WAIT_FOR_EP0_DATA();
+      if(!driver_write_id(EP0BUF, SETUP_LENGTH_LSB())){
         STALLEP0();
       }
       break;
 
     case CMD_DRIVER_CONFIG:
-      EP0BCL = 0; SYNCDELAY;    // arm EP0
-      while (EP0CS & bmEPBUSY)  // wait for OUT data
-        ;
-      if(!driver_config((DRIVER_CONFIG*)EP0BUF)){
+      WAIT_FOR_EP0_DATA();
+      if(EP0BCL != sizeof(DRIVER_CONFIG)){
+        STALLEP0();
+      }else if(!driver_config((DRIVER_CONFIG*)EP0BUF)){
         STALLEP0();
       }
       break;
 
     case CMD_PWR_SET_DAC:
-      if(!pwr_set_dac(SETUPDAT[4], SETUP_VALUE(), SETUPDAT[5])){
+      if(!pwr_set_dac(SETUP_INDEX_LSB(), SETUP_VALUE(), SETUP_INDEX_MSB())){
         STALLEP0();
       }
       break;
 
     case CMD_PWR_SET_VOLTAGE:
-      if(!pwr_ramp_voltage(SETUPDAT[4], SETUPDAT[2], SETUPDAT[3])){
+      if(!pwr_ramp_voltage(SETUP_INDEX_LSB(), SETUP_VALUE_LSB(), SETUP_VALUE_MSB())){
         STALLEP0();
       }
       break;
 
     case CMD_PWR_SET_CURRENT:
-      if(!pwr_set_current(SETUPDAT[4]+(SETUPDAT[4]<2 ? 2 : 0),
-                          SETUPDAT[2])){
+      if(!pwr_set_current(SETUP_INDEX_LSB()+(SETUP_INDEX_LSB()<2 ? 2 : 0),
+                          SETUP_VALUE_LSB())){
         STALLEP0();
       }
       break;
 
     case CMD_PWR_SWITCH:
-      if(SETUPDAT[2] == 0x00){
+      if(SETUP_VALUE_LSB() == 0x00){
         // Suppress OCPROT# interrupt when safely switching power off
         EX1 = 0;
         pwr_switch_off();
@@ -257,7 +237,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         EX1 = 1;
         GPIO_LEDG_ON();
         GPIO_LEDR_OFF();
-      }else if(SETUPDAT[2] == 0x01){
+      }else if(SETUP_VALUE_LSB() == 0x01){
         GPIO_LEDG_OFF();
         GPIO_LEDR_OFF();
         pwr_switch_on();
@@ -278,39 +258,32 @@ BOOL handle_vendorcommand(BYTE cmd)
       break;
 
     case CMD_EEPROM_READ:
-      if(eeprom_read(EEPROM_ADDR, SETUP_INDEX(), SETUPDAT[6], EP0BUF)){
-        EP0BCL = SETUPDAT[6];
+      if(eeprom_read(EEPROM_ADDR, SETUP_INDEX(), SETUP_LENGTH_LSB(), EP0BUF)){
+        EP0BCL = SETUP_LENGTH_LSB();
       }else{
         STALLEP0();
       }
       break;
 
     case CMD_EEPROM_WRITE:
-      EP0BCL = 0; SYNCDELAY;    // arm EP0
-      while (EP0CS & bmEPBUSY)  // wait for OUT data
-        ;
-      if(!eeprom_write(EEPROM_ADDR, SETUP_INDEX(), SETUPDAT[6], EP0BUF)){
+      WAIT_FOR_EP0_DATA();
+      if(!eeprom_write(EEPROM_ADDR, SETUP_INDEX(), SETUP_LENGTH_LSB(), EP0BUF)){
         STALLEP0();
       }
       break;
 
     case CMD_IFC_SET_CONFIG:
-      EP0BCL = 0; SYNCDELAY;    // arm EP0
-      while (EP0CS & bmEPBUSY)  // wait for OUT data
-        ;
-      __asm
-        ; source
-        mov	_AUTOPTRH1,#(_EP0BUF >> 8)
-        mov	_AUTOPTRL1,#_EP0BUF
-      __endasm;
-      if(!ifc_set_config(SETUPDAT[4], SETUP_VALUE(), SETUPDAT[6])){
+      if(SETUP_LENGTH_LSB() != 0)
+        WAIT_FOR_EP0_DATA();
+      LOAD_AUTOPTR1(EP0BUF);
+      if(!ifc_set_config(SETUP_INDEX_LSB(), SETUP_VALUE(), SETUP_LENGTH_LSB())){
         STALLEP0();
       }
       break;
 
     case CMD_IFC_READ_ID:
-      if(ifc_read_id(SETUPDAT[4], EP0BUF)){
-        EP0BCL = SETUPDAT[6];
+      if(ifc_read_id(SETUP_INDEX_LSB(), EP0BUF)){
+        EP0BCL = SETUP_LENGTH_LSB();
       }else{
         STALLEP0();
       }
@@ -348,10 +321,7 @@ BOOL handle_vendorcommand(BYTE cmd)
 
 void handle_ep1ibn(void)
 {
-  __asm
-    mov	_AUTOPTRH1,#(_EP1INBUF >> 8)
-    mov	_AUTOPTRL1,#_EP1INBUF
-  __endasm;
+  LOAD_AUTOPTR1(EP1INBUF);
 
   XAUTODAT1 = GPIO_SW_STATE();
   XAUTODAT1 = GPIO_DCOK_STATE();

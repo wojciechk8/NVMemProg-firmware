@@ -23,6 +23,7 @@
 #include <fx2types.h>
 
 #include "../fpga.h"
+#include "../utils.h"
 #include "module.h"
 
 
@@ -85,10 +86,7 @@ void update_hiaddr(void)
   WORD tmp = hiaddr;
   __bit lb;
 
-  __asm
-    mov	_AUTOPTRH1,#(_hiaddr_map >> 8)
-    mov	_AUTOPTRL1,#_hiaddr_map
-  __endasm;
+  LOAD_AUTOPTR1(hiaddr_map);
   for(i = 0x00; i < hiaddr_size; i++){
     lb = ((BYTE)tmp)&0x01;
     ((FPGA_UNIV_REGISTERS*)fpga_regs)->mem_mux_selector[XAUTODAT1] = FPGA_UNIV_MUX_ENABLE | FPGA_UNIV_MUX_LOW | lb;
@@ -142,8 +140,6 @@ BOOL poll_dq6(void)
 
 void ifc_init(void)
 {
-  BYTE i;
-
   // GPIF config
   IFCONFIG = bmIFCLKSRC|bm3048MHZ   // IFCLK = Internal 48MHz
              |bmIFGPIF;             // ports in GPIF master mode
@@ -159,17 +155,9 @@ void ifc_init(void)
   GPIFHOLDAMOUNT = 0x01;  // 1/2 IFCLK hold time
 
   // Load WaveData
-  __asm
-    ; source
-    mov	_AUTOPTRH1,#(_wave_data >> 8)
-    mov	_AUTOPTRL1,#_wave_data
-    ; destination
-    mov	_AUTOPTRH2,#0xE4
-    mov	_AUTOPTRL2,#0x00
-  __endasm;
-  for(i = 0x00; i < 128; i++){
-    XAUTODAT2 = XAUTODAT1;
-  }
+  LOAD_AUTOPTR1(wave_data);
+  LOAD_AUTOPTR2(GPIF_WAVE_DATA);
+  AUTOPTR_TRANSFER(sizeof(wave_data));
 
   // Configure GPIF Address pins, output initial value,
   PORTCCFG = 0xFF;    // [7:0] as alt. func. GPIFADR[7:0]
@@ -185,18 +173,10 @@ void ifc_init(void)
 // Data pointed by the autopointer 1
 BOOL ifc_set_config(IFC_CFG_TYPE type, WORD param, BYTE data_len)
 {
-  BYTE i;
-
   switch(type){
     case IFC_CFG_ADDRESS_PIN_MAPPING:
-      __asm
-        ; destination
-        mov	_AUTOPTRH2,#(_hiaddr_map >> 8)
-        mov	_AUTOPTRL2,#_hiaddr_map
-      __endasm;
-      for(i = 0x00; i < data_len; i++){
-        XAUTODAT2 = XAUTODAT1;
-      }
+      LOAD_AUTOPTR2(hiaddr_map);
+      AUTOPTR_TRANSFER(data_len);
       hiaddr_size = data_len;
       break;
   }
