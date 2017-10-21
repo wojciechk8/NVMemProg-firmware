@@ -5,6 +5,13 @@
 VID:=0x1209
 PID:=0x4801
 
+# Target interface module for programming (set it from command line)
+# ie. make program IFC=dummy
+IFC?=dummy
+
+# Driver name
+DRIVER:=default
+
 # Linker parameters
 DSCR_AREA:=-Wl"-b DSCR_AREA=0x3e00"
 INT2JT:=-Wl"-b INT2JT=0x3f00"
@@ -13,13 +20,12 @@ XRAM_SIZE:=--xram-size 0x0200
 XRAM_LOC:=--xram-loc 0x3c00
 
 # The source files of the project
-SRC:=$(wildcard *.c)
-ASRC:=$(wildcard *.a51)
+SRC:=delay_us.c driver.c fpga.c nvmemprog.c power.c
+ASRC:=dscr.a51
 
 # Memory interface modules
 IFCMODDIR:=ifc_mod
-IFCMODSRC:=$(wildcard $(IFCMODDIR)/*.c)
-IFCMODTARGETS:=$(notdir $(basename $(IFCMODSRC)))
+IFCMODSRC:=dummy.c 28f.c 29lv.c mbm27c.c
 
 # Other include directories
 INCDIR:=.
@@ -31,41 +37,41 @@ FX2LIBDIR:=/opt/fx2lib
 OBJDIR:=obj
 BINDIR:=bin
 
-# Target interface for programming (set it from command line)
-# ie. make program IFC=dummy
-IFC?=dummy
 
 
+# Internal variables
 
-# Internal variables names
+# Interface module targets
+IFCMODTARGETS:=$(IFCMODSRC)
+IFCMODSRC:=$(addprefix $(IFCMODDIR)/,$(IFCMODSRC))
+IFCMODOBJ:=$(IFCMODTARGETS:%.c=$(IFCMODDIR)/$(OBJDIR)/%.rel)
+IFCMODLST:=$(IFCMODOBJ:%.rel=%.lst)
+IFCMODRST:=$(IFCMODOBJ:%.rel=%.rst)
+IFCMODSYM:=$(IFCMODOBJ:%.rel=%.sym)
+IFCMODASM:=$(IFCMODOBJ:%.rel=%.asm)
+
+# Main targets
+SRC+= driver_$(DRIVER).c
 OBJ:=$(SRC:%.c=$(OBJDIR)/%.rel) $(ASRC:%.a51=$(OBJDIR)/%.rel)
-LST:=$(SRC:%.c=$(OBJDIR)/%.lst) $(ASRC:%.a51=$(OBJDIR)/%.lst)
-RST:=$(SRC:%.c=$(OBJDIR)/%.rst) $(ASRC:%.a51=$(OBJDIR)/%.rst)
-SYM:=$(SRC:%.c=$(OBJDIR)/%.sym) $(ASRC:%.a51=$(OBJDIR)/%.sym)
-ASM:=$(SRC:%.c=$(OBJDIR)/%.asm) 
-IHX:=$(addprefix $(BINDIR)/,$(addsuffix .ihx,$(IFCMODTARGETS)))
-BIX:=$(addprefix $(BINDIR)/,$(addsuffix .bix,$(IFCMODTARGETS)))
-IIC:=$(addprefix $(BINDIR)/,$(addsuffix .iic,$(IFCMODTARGETS)))
-LK:=$(addprefix $(BINDIR)/,$(addsuffix .lk,$(IFCMODTARGETS)))
-MEM:=$(addprefix $(BINDIR)/,$(addsuffix .mem,$(IFCMODTARGETS)))
-MAP:=$(addprefix $(BINDIR)/,$(addsuffix .map,$(IFCMODTARGETS)))
-
-IFCMODOBJ:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.rel)))
-IFCMODLST:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.lst)))
-IFCMODRST:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.rst)))
-IFCMODSYM:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.sym)))
-IFCMODASM:=$(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.asm))) 
+LST:=$(OBJ:%.rel=%.lst)
+RST:=$(OBJ:%.rel=%.rst)
+SYM:=$(OBJ:%.rel=%.sym)
+ASM:=$(OBJ:%.rel=%.asm)
+IHX:=$(addprefix $(BINDIR)/,$(IFCMODTARGETS:%.c=%.ihx))
+BIX:=$(IHX:%.ihx=%.bix)
+IIC:=$(IHX:%.ihx=%.iic)
+LK:=$(IHX:%.ihx=%.lk)
+MEM:=$(IHX:%.ihx=%.mem)
+MAP:=$(IHX:%.ihx=%.map)
 
 # Dependecies
-DEPENDS:=$(SRC:%.c=$(OBJDIR)/%.d) $(addprefix $(IFCMODDIR)/$(OBJDIR)/,$(notdir $(IFCMODSRC:%.c=%.d)))
+DEPENDS:=$(SRC:%.c=$(OBJDIR)/%.d) $(ASRC:%.a51=$(OBJDIR)/%.d) $(IFCMODOBJ:%.rel=%.d)
 
 # Build tools
 CC:=sdcc
 AS:=sdas8051
 OBJCOPY:=objcopy
-OBJDUMP:=objdump
 SIZE:=size
-
 FX2PROG:=cycfx2prog
 
 # Common flags
@@ -81,14 +87,16 @@ LDFLAGS+= $(CODE_SIZE) $(XRAM_SIZE) $(XRAM_LOC) $(DSCR_AREA) $(INT2JT)
 LDLIBS:=fx2.lib
 
 
-# Additional Suffixes
-#.SUFFIXES: .rel .ihx .bix
-
 # Targets
 .PHONY: all
-all: $(BINDIR) $(OBJDIR) $(IFCMODDIR)/$(OBJDIR) $(IHX)
-#	$(foreach f,$(IHX),$(SIZE) $(f))
-	tail -n 5 $(MEM)
+all: dirs $(IHX)
+	@tail -n 5 $(MEM)
+
+.PHONY: dirs
+dirs:
+	@mkdir -p $(OBJDIR)
+	@mkdir -p $(IFCMODDIR)/$(OBJDIR)
+	@mkdir -p $(BINDIR)
 
 .PHONY: ihx
 ihx: $(IHX)
@@ -103,7 +111,7 @@ iic: $(IIC)
 program: $(IHX)
 	$(FX2PROG) -id=$(VID).$(PID) prg:$(BINDIR)/$(IFC).ihx
 	$(FX2PROG) -id=$(VID).$(PID) run
-	$(SIZE) $(IHX)
+	tail -n 5 $(MEM)
 
 .PHONY: run
 run: $(IHX)
@@ -118,19 +126,8 @@ $(IFCMODOBJ) $(IFCMODLST) $(IFCMODRST) $(IFCMODSYM) $(IFCMODASM)
 	$(RM) -d $(BINDIR) $(OBJDIR) $(IFCMODDIR)/$(OBJDIR)
 
 
-# implicit rules
-$(OBJDIR)/%.rel: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-	$(CC) -MM $(CFLAGS) -c $< -o $(patsubst %.rel,%.d,$@)
-	sed -i "1s/^/$(OBJDIR)\//" $(patsubst %.rel,%.d,$@)
-
-$(OBJDIR)/%.rel: %.a51
-	$(AS) -logs $(ASFLAGS) $@ $^
-
-$(IFCMODDIR)/$(OBJDIR)/%.rel: $(IFCMODDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-	$(CC) -MM $(CFLAGS) -c $< -o $(patsubst %.rel,%.d,$@)
-	sed -i "1s/^/$(IFCMODDIR)\/$(OBJDIR)\//" $(patsubst %.rel,%.d,$@)
+# build rules
+.SECONDARY: $(OBJ) $(IFCMODOBJ)
 
 $(BINDIR)/%.ihx: $(IFCMODDIR)/$(OBJDIR)/%.rel $(OBJ)
 	$(CC) $(LDFLAGS) $(LDLIBS) $(OBJ) $< -o $@
@@ -142,13 +139,18 @@ $(BINDIR)/%.bix: $(BINDIR)/%.ihx
 $(BINDIR)/%.iic: $(BINDIR)/%.ihx
 	$(FX2LIBDIR)/utils/ihx2iic.py -v $(VID) -p $(PID) $< $@
 
-# explicit rules
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-$(IFCMODDIR)/$(OBJDIR):
-	mkdir -p $(IFCMODDIR)/$(OBJDIR)
-$(BINDIR):
-	mkdir -p $(BINDIR)
+$(OBJDIR)/%.rel: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) -MM $(CFLAGS) -c $< -o $(patsubst %.rel,%.d,$@)
+	@sed -i "1s/^/$(OBJDIR)\//" $(patsubst %.rel,%.d,$@)
+
+$(OBJDIR)/%.rel: %.a51
+	$(AS) -logs $(ASFLAGS) $@ $^
+
+$(IFCMODDIR)/$(OBJDIR)/%.rel: $(IFCMODDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) -MM $(CFLAGS) -c $< -o $(patsubst %.rel,%.d,$@)
+	@sed -i "1s/^/$(IFCMODDIR)\/$(OBJDIR)\//" $(patsubst %.rel,%.d,$@)
 
 # include dependecies
 -include $(DEPENDS)
