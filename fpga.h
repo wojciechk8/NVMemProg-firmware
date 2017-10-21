@@ -34,8 +34,8 @@ inline void fpga_init(void)
   GPIO_FPGA_CONFIG_UNSET();
 
   // Serial0 mode 0, CLKOUT/4
-  //SCON0 = bmBIT5;   // SM2 = 1; TI = 0
-  SCON0 = 0;
+  SCON0 = bmBIT5;   // SM2 = 1; TI = 0
+  //SCON0 = 0;
 }
 
 
