@@ -40,10 +40,11 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 
 
   CMD_FPGA_START_CONFIG=0x20, // ---            ---             ---
-  CMD_FPGA_WRITE_CONFIG=0x21, // ---            ---             data
+  CMD_FPGA_WRITE_CONFIG=0x21, // ---            ---             data*
   CMD_FPGA_GET_STATUS=0x22,   // ---            ---             status
   CMD_FPGA_READ_REGS=0x23,    // ---            addr            data
   CMD_FPGA_WRITE_REGS=0x24,   // ---            addr            data
+  // * transfer length can be greater than 64 bytes
 
 
   CMD_DRIVER_READ_ID=0x30,    // ---            ---             driver id data
@@ -69,7 +70,7 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_EEPROM_WRITE=0x51,      // ---            addr            data
   
   
-  CMD_IFC_SET_CONFIG=0x60,    // param          config_type     data
+  CMD_IFC_SET_CONFIG=0x60,    // param          config_type     data(optional)
   CMD_IFC_READ_ID=0x61,       // ---            id_type         id
   CMD_IFC_ERASE_CHIP=0x62,    // ---            ---             ---
   CMD_IFC_READ_DATA=0x63,     // ---            ---             ---(data via EP6)
