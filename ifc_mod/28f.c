@@ -188,7 +188,7 @@ BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param)
   BYTE i;
 
   switch(type){
-    case IFC_CFG_ADDRESS_MAPPING:
+    case IFC_CFG_ADDRESS_PIN_MAPPING:
       __asm
         ; destination
         mov	_AUTOPTRH2,#(_hiaddr_map >> 8)

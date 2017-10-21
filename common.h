@@ -174,7 +174,7 @@ typedef struct{
 
 // Memory Interface
 typedef enum{                 // What is configured:
-  IFC_CFG_ADDRESS_MAPPING,// pin numbers of high address lines (>= A9)
+  IFC_CFG_ADDRESS_PIN_MAPPING,// pin numbers of high address lines (>= A9)
 }IFC_CFG_TYPE;
 
 typedef enum{
