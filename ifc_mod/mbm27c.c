@@ -88,6 +88,7 @@ __xdata WORD gpif_addr;
 __xdata WORD ep_byte_cnt;
 __xdata WORD write_byte_cnt;
 __xdata BYTE verify_cnt;
+static volatile __bit busy = FALSE;
 
 
 //******************************************************************************
@@ -196,6 +197,7 @@ BOOL ifc_prepare_read(void)
   GPIFTRIG = bmBIT2 | 0x2;
 
   state = STATE_READ_DATA;
+  busy = TRUE;
 
   return TRUE;
 }
@@ -238,8 +240,7 @@ BOOL ifc_prepare_write(void)
 
 BOOL ifc_busy(void)
 {
-  return (state != STATE_IDLE)
-         && ((state != STATE_WRITE_DATA) || !(EP2468STAT & bmEP2EMPTY));
+  return busy;
 }
 
 
@@ -263,6 +264,7 @@ void ifc_abort(void)
   FIFORESET = 0x00;
 
   state = STATE_IDLE;
+  busy = FALSE;
 }
 
 
@@ -300,6 +302,7 @@ void ifc_process(void)
           write_byte_cnt = 0;
           verify_cnt = 0;
           write_state = WRITE_STATE_PROGRAM;
+          busy = TRUE;
           break;
         
         case WRITE_STATE_PROGRAM:
@@ -366,6 +369,7 @@ void ifc_process(void)
                 OUTPKTEND = 0x82; SYNCDELAY; // skip pkt.
                 FIFORESET = 0x00;            // release nak all
                 write_state = WRITE_STATE_IDLE;
+                busy = FALSE;
               }else{
                 write_state = WRITE_STATE_PROGRAM;
               }

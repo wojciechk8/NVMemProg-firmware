@@ -77,7 +77,7 @@ const __code BYTE wave_data[128] =
 __xdata BYTE hiaddr_map[16];
 __xdata BYTE hiaddr_size;
 __xdata WORD hiaddr;
-
+static volatile __bit busy = FALSE;
 
 
 //******************************************************************************
@@ -243,6 +243,7 @@ BOOL ifc_erase_chip(void)
   gpif_command_sequence (CMD_CHIP_ERASE);
 
   state = STATE_ERASE;
+  busy = TRUE;
 
   return TRUE;
 }
@@ -271,6 +272,7 @@ BOOL ifc_prepare_read(void)
   GPIFTRIG = bmBIT2 | 0x2;
 
   state = STATE_READ_DATA;
+  busy = TRUE;
 
   return TRUE;
 }
@@ -314,8 +316,7 @@ BOOL ifc_prepare_write(void)
 
 BOOL ifc_busy(void)
 {
-  return (state != STATE_IDLE)
-         && ((state != STATE_WRITE_DATA) || !(EP24FIFOFLGS & bmBIT1));
+  return busy;
 }
 
 
@@ -344,6 +345,7 @@ void ifc_abort(void)
   FIFORESET = 0x00;
 
   state = STATE_IDLE;
+  busy = FALSE;
 }
 
 
@@ -372,8 +374,10 @@ void ifc_process(void)
 
     case STATE_WRITE_DATA:
       if(GPIFTRIG & bmBIT7){  // if GPIF done
-        if(EP24FIFOFLGS & bmBIT1) // if EP2FIFO empty
+        if(EP24FIFOFLGS & bmBIT1){ // if EP2FIFO empty
+          busy = FALSE;
           break;
+        }
 
         if(!poll_dq6())
           break;
@@ -386,7 +390,8 @@ void ifc_process(void)
         gpif_command_sequence (CMD_PROGRAM);
         
         GPIFTCB0 = 0x01; SYNCDELAY; // 1 transaction
-        GPIFTRIG = 0x0;   // trigger EP2 write data transaction
+        GPIFTRIG = 0x0;             // trigger EP2 write data transaction
+        busy = TRUE;
       }
       break;
   }
