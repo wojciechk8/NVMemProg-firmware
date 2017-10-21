@@ -303,7 +303,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         mov	_AUTOPTRH1,#(_EP0BUF >> 8)
         mov	_AUTOPTRL1,#_EP0BUF
       __endasm;
-      if(!ifc_set_config(SETUPDAT[4], SETUPDAT[2])){
+      if(!ifc_set_config(SETUPDAT[4], SETUP_VALUE(), SETUPDAT[6])){
         STALLEP0();
       }
       break;

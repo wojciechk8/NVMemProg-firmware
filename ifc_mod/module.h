@@ -30,7 +30,7 @@ extern const char fw_signature[FW_SIGNATURE_SIZE];
 
 void ifc_init(void);
 
-BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param); // Data pointed by the autopointer 1
+BOOL ifc_set_config(IFC_CFG_TYPE type, WORD param, BYTE data_len); // Data pointed by the autopointer 1
 
 BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id);
 BOOL ifc_erase_chip(void);

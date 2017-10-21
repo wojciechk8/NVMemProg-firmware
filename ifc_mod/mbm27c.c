@@ -158,7 +158,7 @@ void ifc_init(void)
 
 
 // Data pointed by the autopointer 1
-BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param)
+BOOL ifc_set_config(IFC_CFG_TYPE type, WORD param, BYTE data_len)
 {
   BYTE i;
 
@@ -169,10 +169,10 @@ BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param)
         mov	_AUTOPTRH2,#(_hiaddr_map >> 8)
         mov	_AUTOPTRL2,#_hiaddr_map
       __endasm;
-      for(i = 0x00; i < param; i++){
+      for(i = 0x00; i < data_len; i++){
         XAUTODAT2 = XAUTODAT1;
       }
-      hiaddr_size = param;
+      hiaddr_size = data_len;
       break;
   }
 

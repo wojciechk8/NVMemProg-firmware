@@ -44,10 +44,11 @@ void ifc_init(void)
 
 
 // Data pointed by the autopointer 1
-BOOL ifc_set_config(IFC_CFG_TYPE type, BYTE param)
+BOOL ifc_set_config(IFC_CFG_TYPE type, WORD param, BYTE data_len)
 {
   type;
   param;
+  data_len;
   return FALSE;
 }
 
