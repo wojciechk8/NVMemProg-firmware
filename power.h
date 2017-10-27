@@ -46,5 +46,5 @@ BOOL pwr_ramp_voltage(PWR_CH ch, BYTE voltage, int8_t rate);
 // MUST BE CALLED at the initialization of the device
 BOOL pwr_reset(void);
 
-void pwr_switch_off(void);
-void pwr_switch_on(void);
+void pwr_switch_off(PWR_CH ch);
+void pwr_switch_on(PWR_CH ch);

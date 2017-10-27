@@ -222,17 +222,25 @@ BOOL pwr_reset(void)
 }
 
 
-void pwr_switch_off(void)
+void pwr_switch_off(PWR_CH ch)
 {
   GPIO_PWRSW_CLK_UNSET(); SYNCDELAY;
-  GPIO_PWRSW_D_UNSET(); SYNCDELAY;
+  if(ch == PWR_CH_VPP)
+    GPIO_PWRSW_VPP_D_UNSET();
+  else if(ch == PWR_CH_VCC)
+    GPIO_PWRSW_VCC_D_UNSET();
+  SYNCDELAY;
   GPIO_PWRSW_CLK_SET();
 }
 
 
-void pwr_switch_on(void)
+void pwr_switch_on(PWR_CH ch)
 {
   GPIO_PWRSW_CLK_UNSET(); SYNCDELAY;
-  GPIO_PWRSW_D_SET(); SYNCDELAY;
+  if(ch == PWR_CH_VPP)
+    GPIO_PWRSW_VPP_D_SET();
+  else if(ch == PWR_CH_VCC)
+    GPIO_PWRSW_VCC_D_SET();
+  SYNCDELAY;
   GPIO_PWRSW_CLK_SET();
 }

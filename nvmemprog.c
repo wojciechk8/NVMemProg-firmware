@@ -237,7 +237,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       if(SETUP_VALUE_LSB() == 0x00){
         // Suppress OCPROT# interrupt when safely switching power off
         EX1 = 0;
-        pwr_switch_off();
+        pwr_switch_off(SETUP_INDEX_LSB());
         delay_us(10);
         IE1 = 0;
         EX1 = 1;
@@ -246,7 +246,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       }else if(SETUP_VALUE_LSB() == 0x01){
         GPIO_LEDG_OFF();
         GPIO_LEDR_OFF();
-        pwr_switch_on();
+        pwr_switch_on(SETUP_INDEX_LSB());
       }else{
         STALLEP0();
       }
@@ -330,7 +330,6 @@ void handle_ep1ibn(void)
   LOAD_AUTOPTR1(EP1INBUF);
 
   XAUTODAT1 = GPIO_SW_STATE();
-  XAUTODAT1 = GPIO_DCOK_STATE();
   XAUTODAT1 = ocprot;
   XAUTODAT1 = ifc_busy();
 
@@ -353,7 +352,8 @@ void device_init(void)
   AUTOPTRSETUP = bmBIT2|bmBIT1|bmBIT0;  // enable autoptr; increment both
 
   gpio_init();
-  pwr_switch_off();
+  pwr_switch_off(PWR_CH_VPP);
+  pwr_switch_off(PWR_CH_VCC);
   driver_init();
   pwr_init();
 

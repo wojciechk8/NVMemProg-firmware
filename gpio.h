@@ -34,11 +34,12 @@
 #define GPIO_LEDR_ON() PA6 = 1
 #define GPIO_LEDR_OFF() PA6 = 0
 #define GPIO_SW_STATE() (!PA5)
-#define GPIO_DCOK_STATE() PA4
 #define GPIO_PWRSW_CLK_SET() PA3 = 1
 #define GPIO_PWRSW_CLK_UNSET() PA3 = 0
-#define GPIO_PWRSW_D_SET() PA2 = 1
-#define GPIO_PWRSW_D_UNSET() PA2 = 0
+#define GPIO_PWRSW_VPP_D_SET() PA2 = 1
+#define GPIO_PWRSW_VPP_D_UNSET() PA2 = 0
+#define GPIO_PWRSW_VCC_D_SET() PA4 = 1
+#define GPIO_PWRSW_VCC_D_UNSET() PA4 = 0
 #define GPIO_PWRSW_STATE() (PA1)
 #define GPIO_DRIVER_EN_SET() IOE |= bmBIT5
 #define GPIO_DRIVER_EN_UNSET() IOE &= ~bmBIT5
@@ -58,10 +59,10 @@
 inline void gpio_init(void)
 {
   // PORTA
-  // LEDG, LEDR, SW, DC_OK, PWRSW_CLK, PWRSW_D, OCPROT#(INT1#), N/C
+  // LEDG, LEDR, SW, PWRSW_VCC_D, PWRSW_CLK, PWRSW_VPP_D, OCPROT#(INT1#), N/C
   PORTACFG = bmINT1;
   IOA = bmBIT3;
-  OEA = bmBIT7|bmBIT6|bmBIT3|bmBIT2|bmBIT0;
+  OEA = bmBIT7|bmBIT6|bmBIT4|bmBIT3|bmBIT2|bmBIT0;
 
   // PORTB
   // FD[7:0]

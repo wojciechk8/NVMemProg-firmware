@@ -61,7 +61,7 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
   CMD_PWR_SET_VOLTAGE=0x41,   // voltage(LSB),  0=VPP 1=VCC     ---
                               // slew rate(MSB)
   CMD_PWR_SET_CURRENT=0x42,   // value          0,2=IPP 1,3=ICC ---
-  CMD_PWR_SWITCH=0x43,        // 0=off 1=on     ---             ---
+  CMD_PWR_SWITCH=0x43,        // 0=off 1=on     0=VPP 1=VCC     ---
   CMD_PWR_RESET=0x44,         // ---            ---             ---
   CMD_PWR_SW_STATE=0x4F,      // ---            ---             pwr_sw state
 
@@ -166,7 +166,6 @@ enum{
 // Device Status
 typedef struct{
   BYTE sw;
-  BYTE dcok;
   BYTE ocprot;
   BYTE ifc_busy;
 }DEVICE_STATUS;
