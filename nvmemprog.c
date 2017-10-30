@@ -327,11 +327,9 @@ BOOL handle_vendorcommand(BYTE cmd)
 
 void handle_ep1ibn(void)
 {
-  LOAD_AUTOPTR1(EP1INBUF);
-
-  XAUTODAT1 = GPIO_SW_STATE();
-  XAUTODAT1 = ocprot;
-  XAUTODAT1 = ifc_busy();
+  EP1INBUF[0] = GPIO_SW_STATE();
+  EP1INBUF[1] = ocprot;
+  EP1INBUF[2] = ifc_busy();
 
   EP1INBC = sizeof(DEVICE_STATUS);  // arm EP1IN
 
