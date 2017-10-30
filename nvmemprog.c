@@ -159,9 +159,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       LOAD_AUTOPTR1(fpga_regs);
       LOAD_AUTOPTR2(EP0BUF);
       AUTOPTRL1 = SETUP_INDEX_LSB();
-      for (i = 0x00; i < SETUP_LENGTH_LSB(); i++){
-        XAUTODAT2 = XAUTODAT1;
-      }
+      AUTOPTR_TRANSFER(SETUP_LENGTH_LSB());
       EP0BCL = SETUP_LENGTH_LSB();
       break;
     
@@ -170,9 +168,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       LOAD_AUTOPTR1(EP0BUF);
       LOAD_AUTOPTR2(fpga_regs);
       AUTOPTRL2 = SETUP_INDEX_LSB();
-      for (i = 0x00; i < SETUP_LENGTH_LSB(); i++){
-        XAUTODAT2 = XAUTODAT1;
-      }
+      AUTOPTR_TRANSFER(SETUP_LENGTH_LSB());
       break;
 
     case CMD_DRIVER_READ_ID:
