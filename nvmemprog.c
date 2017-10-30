@@ -356,6 +356,7 @@ void device_init(void)
   pwr_switch_off(PWR_CH_VCC);
   driver_init();
   pwr_init();
+  fpga_init();
 
   // Endpoints configuration
   EP1INCFG = bmVALID|bmTYPE1|bmTYPE0; SYNCDELAY;  // INT 64B
