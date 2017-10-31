@@ -43,7 +43,6 @@ enum MEMORY_CMD{
 
 enum IFC_STATE{
   STATE_IDLE,
-  STATE_ERASE,
   STATE_READ_DATA,
   STATE_WRITE_DATA
 }state;
@@ -211,7 +210,7 @@ BOOL ifc_prepare_write(void)
   
   // Timer 0
   TMOD = 0x00;    // Mode 0 (13bit); timer
-  CKCON = 0x01;   // Timer source: CLKOUT/12 (12MHz)
+  CKCON = 0x01;   // Timer source: CLKOUT/12 (4MHz)
   ET0 = 0;        // Disable interrupt
 
   GPIFADRH = 0x00;       SYNCDELAY;
