@@ -98,11 +98,9 @@ void update_hiaddr(void)
 void reset_memory_command(void)
 {
   GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
   GPIFSGLDATLX = CMD_RESET;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
 }
 
 /*
@@ -111,8 +109,7 @@ BOOL poll_dq7(void)
   __bit actual_dq7;
 
   actual_dq7 = XGPIFSGLDATLX;   // trigger read sequence
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
   actual_dq7 = XGPIFSGLDATLNOX & 0x80;
 
   return !(actual_dq7 ^ expected_dq7)
@@ -124,11 +121,9 @@ BOOL poll_dq6(void)
   BYTE dq6, next_dq6;
 
   dq6 = GPIFSGLDATLX;   // trigger read sequence
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
   dq6 = GPIFSGLDATLX & 0x40;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
   next_dq6 = GPIFSGLDATLNOX & 0x40;
 
   return !(dq6 ^ next_dq6);
@@ -206,8 +201,7 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
   }
   
   dummy = GPIFSGLDATLX;  // trigger read sequence
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
   id[0] = GPIFSGLDATLNOX;
 
   ifc_abort();
@@ -225,11 +219,9 @@ BOOL ifc_erase_chip(void)
   reset_memory_command();
 
   GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
   GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
-  while(!(GPIFTRIG & bmBIT7))
-    ;
+  WAIT_FOR_GPIF_DONE();
 
   state = STATE_ERASE;
   busy = TRUE;
@@ -348,7 +340,7 @@ void ifc_process(void)
       break;
 
     case STATE_READ_DATA:
-      if(GPIFTRIG & bmBIT7){
+      if(IS_GPIF_DONE()){
         hiaddr++;
         update_hiaddr();
         // Reload Transaction Counter
@@ -359,8 +351,8 @@ void ifc_process(void)
       break;
 
     case STATE_WRITE_DATA:
-      if(GPIFTRIG & bmBIT7){  // if GPIF done
-        if(EP24FIFOFLGS & bmBIT1){ // if EP2FIFO empty
+      if(IS_GPIF_DONE()){
+        if(IS_EP2_FIFO_EMPTY()){
           busy = FALSE;
           break;
         }
@@ -374,8 +366,7 @@ void ifc_process(void)
         }
 
         GPIFSGLDATLX = CMD_AUTO_PROGRAM;  // program byte command
-        while(!(GPIFTRIG & bmBIT7))
-          ;
+        WAIT_FOR_GPIF_DONE();
 
         GPIFTCB0 = 0x01; SYNCDELAY; // 1 transaction
         GPIFTRIG = 0x0;             // trigger EP2 write data transaction

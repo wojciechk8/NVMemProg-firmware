@@ -276,7 +276,7 @@ void ifc_process(void)
       return;
 
     case STATE_READ_DATA:
-      if(GPIFTRIG & bmBIT7){  // if GPIF done
+      if(IS_GPIF_DONE()){
         hiaddr++;
         update_hiaddr();
         // Reload Transaction Counter
@@ -305,7 +305,7 @@ void ifc_process(void)
           break;
         
         case WRITE_STATE_PROGRAM:
-          GPIFREADYCFG = 0x40;                        // IntRdy = 0
+          GPIF_INT_READY_UNSET();
           GPIFSGLDATLX = EP2FIFOBUF[write_byte_cnt];  // start writing a byte from FIFO
           // Timer
           TH0 = 0; TL0 = 0;
@@ -317,9 +317,8 @@ void ifc_process(void)
         case WRITE_STATE_PGM_PULSE:
           if(TF0){                      // 2ms elapsed
             TR0 = 0;                    // stop timer
-            GPIFREADYCFG = 0xC0;        // IntRdy = 1
-            while(!(GPIFTRIG & bmBIT7)) // wait for the end of waveform
-              ;
+            GPIF_INT_READY_SET();
+            WAIT_FOR_GPIF_DONE();
             delay_us (45);
             write_state = WRITE_STATE_VERIFY;
           }
@@ -327,14 +326,13 @@ void ifc_process(void)
         
         case WRITE_STATE_VERIFY:
           ver_byte = GPIFSGLDATLX;   // trigger read sequence
-          while(!(GPIFTRIG & bmBIT7))
-            ;
+          WAIT_FOR_GPIF_DONE();
           ver_byte = GPIFSGLDATLNOX;
           
           verify_cnt++;
           if((ver_byte == EP2FIFOBUF[write_byte_cnt])  // verified ok
              || (verify_cnt == 10)){
-            GPIFREADYCFG = 0x40;                        // IntRdy = 0
+            GPIF_INT_READY_UNSET();
             GPIFSGLDATLX = EP2FIFOBUF[write_byte_cnt];  // start writing a byte from FIFO
             // Timer
             TH0 = 0; TL0 = 0;
@@ -350,9 +348,8 @@ void ifc_process(void)
           if(TF0){  // 2ms elapsed since last overflow
             if(!(--verify_cnt)){          // verify_cnt * 2ms elapsed
               TR0 = 0;                    // stop timer
-              GPIFREADYCFG = 0xC0;        // IntRdy = 1
-              while(!(GPIFTRIG & bmBIT7)) // wait for the end of waveform
-                ;
+              GPIF_INT_READY_SET();
+              WAIT_FOR_GPIF_DONE();
               
               gpif_addr++;
               if(*(((BYTE*)(&gpif_addr))+1) == 2){  // gpif_addr == 0x200

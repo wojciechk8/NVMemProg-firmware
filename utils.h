@@ -41,3 +41,11 @@
     while (EP0CS & bmEPBUSY)  /* wait for OUT data */                  \
       ;                                                                \
   }while(0)
+
+#define GPIF_INT_READY_SET() GPIFREADYCFG |= 0x80
+#define GPIF_INT_READY_UNSET() GPIFREADYCFG &= ~0x80
+#define IS_GPIF_DONE() (GPIFTRIG & bmBIT7)
+#define WAIT_FOR_GPIF_DONE() do{ while(!IS_GPIF_DONE()); }while(0)
+
+#define IS_EP2_FIFO_EMPTY() (EP24FIFOFLGS & bmBIT1)
+
