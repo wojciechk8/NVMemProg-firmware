@@ -172,8 +172,11 @@ typedef struct{
 
 
 // Memory Interface
-typedef enum{                 // What is configured:
-  IFC_CFG_ADDRESS_PIN_MAPPING,// pin numbers of high address lines (>= A9)
+typedef enum{                 // param          data
+  IFC_CFG_ADDRESS_PIN_MAPPING,// ---            pin numbers of high address lines (>= A9)
+  IFC_CFG_BLOCK_STRUCTURE     // ---            start addresses of the blocks (little-endian, divided by 512)
+                              //                ie. '0x0000, 0x1000, 0x1800' defines 3 blocks with start addresses:
+                              //                0x0000, 0x2000, 0x3000
 }IFC_CFG_TYPE;
 
 typedef enum{

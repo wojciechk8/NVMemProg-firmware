@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * 28f.c
- * Interface module for Intel 28F... memories
+ * mx28f.c
+ * Interface module for MX28F... memories
  *
  */
 
@@ -30,29 +30,14 @@
 #define SYNCDELAY SYNCDELAY3
 
 
-const char fw_signature[FW_SIGNATURE_SIZE] = "28f";
+const char fw_signature[FW_SIGNATURE_SIZE] = "mx28f";
 
 enum MEMORY_CMD{
-  CMD_ERASE_BLOCK=0x20,
-  CMD_PROGRAM=0x40,
-  CMD_CLEAR_STATUS_REG=0x50,
-  CMD_READ_STATUS_REG=0x70,
+  CMD_AUTO_ERASE_CHIP=0x30,
+  CMD_AUTO_PROGRAM=0x40,
   CMD_READ_ID=0x90,
-  CMD_ERASE_SUSPEND=0xB0,
-  CMD_ERASE_CONFIRM=0xD0,
   CMD_RESET=0xFF
 };
-
-#define STATUS_REG_WSMS (1<<7)
-#define STATUS_REG_READY(sr) (sr & STATUS_REG_WSMS)
-#define STATUS_REG_ESS  (1<<6)
-#define STATUS_REG_ERASE_SUSPENDED(sr) (sr & STATUS_REG_ESS)
-#define STATUS_REG_ES   (1<<5)
-#define STATUS_REG_ERASE_ERROR(sr) (sr & STATUS_REG_ES)
-#define STATUS_REG_PS   (1<<4)
-#define STATUS_REG_PROGRAM_ERROR(sr) (sr & STATUS_REG_PS)
-#define STATUS_REG_VPPS (1<<3)
-#define STATUS_REG_VPP_LOW(sr) (sr & STATUS_REG_VPPS)
 
 enum IFC_STATE{
   STATE_IDLE,
@@ -89,11 +74,6 @@ __xdata BYTE hiaddr_map[16];
 __xdata BYTE hiaddr_size;
 __xdata WORD hiaddr;
 
-#define MAX_BLOCK_NUM 8
-__xdata BYTE block_num;
-__xdata WORD block_hiaddr[MAX_BLOCK_NUM];
-__xdata BYTE erase_block_cnt;
-
 static volatile __bit busy = FALSE;
 
 
@@ -115,25 +95,38 @@ void update_hiaddr(void)
   }
 }
 
-void reset_memory(void)
+void reset_memory_command(void)
 {
   GPIFSGLDATLX = CMD_RESET;
   WAIT_FOR_GPIF_DONE();
-  GPIFSGLDATLX = CMD_CLEAR_STATUS_REG;
+  GPIFSGLDATLX = CMD_RESET;
   WAIT_FOR_GPIF_DONE();
 }
 
-BOOL poll_status_reg_ready(void)
+/*
+BOOL poll_dq7(void)
 {
-  BYTE status;
+  __bit actual_dq7;
 
-  GPIFSGLDATLX = CMD_READ_STATUS_REG;
+  actual_dq7 = XGPIFSGLDATLX;   // trigger read sequence
   WAIT_FOR_GPIF_DONE();
-  status = GPIFSGLDATLX;   // trigger read sequence
-  WAIT_FOR_GPIF_DONE();
-  status = GPIFSGLDATLNOX;
+  actual_dq7 = XGPIFSGLDATLNOX & 0x80;
 
-  return (STATUS_REG_READY(status));
+  return !(actual_dq7 ^ expected_dq7)
+}
+*/
+
+BOOL poll_dq6(void)
+{
+  BYTE dq6, next_dq6;
+
+  dq6 = GPIFSGLDATLX;   // trigger read sequence
+  WAIT_FOR_GPIF_DONE();
+  dq6 = GPIFSGLDATLX & 0x40;
+  WAIT_FOR_GPIF_DONE();
+  next_dq6 = GPIFSGLDATLNOX & 0x40;
+
+  return !(dq6 ^ next_dq6);
 }
 
 
@@ -176,22 +169,11 @@ void ifc_init(void)
 // Data pointed by the autopointer 1
 BOOL ifc_set_config(IFC_CFG_TYPE type, WORD param, BYTE data_len)
 {
-  BYTE blocks;
-  
   switch(type){
     case IFC_CFG_ADDRESS_PIN_MAPPING:
       LOAD_AUTOPTR2(hiaddr_map);
       AUTOPTR_TRANSFER(data_len);
       hiaddr_size = data_len;
-      break;
-    
-    case IFC_CFG_BLOCK_STRUCTURE:
-      blocks = data_len >> 1;
-      if(blocks > MAX_BLOCK_NUM)
-        return FALSE;
-      block_num = blocks;
-      LOAD_AUTOPTR2(block_hiaddr);
-      AUTOPTR_TRANSFER(data_len);
       break;
   }
 
@@ -234,9 +216,12 @@ BOOL ifc_erase_chip(void)
     return FALSE;
   }
   
-  reset_memory();
-  
-  erase_block_cnt = 0;
+  reset_memory_command();
+
+  GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
+  WAIT_FOR_GPIF_DONE();
+  GPIFSGLDATLX = CMD_AUTO_ERASE_CHIP;
+  WAIT_FOR_GPIF_DONE();
 
   state = STATE_ERASE;
   busy = TRUE;
@@ -279,7 +264,7 @@ BOOL ifc_prepare_write(void)
     return FALSE;
   }
   
-  reset_memory();
+  reset_memory_command();
 
   // Init Transaction Counter
   GPIFTCB1 = 0x00;       SYNCDELAY;
@@ -348,18 +333,9 @@ void ifc_process(void)
       return;
 
     case STATE_ERASE:
-      if(poll_status_reg_ready()){     // Erase completed
-        if(erase_block_cnt < block_num) {
-          hiaddr = block_hiaddr[erase_block_cnt++];
-          update_hiaddr();
-          GPIFSGLDATLX = CMD_ERASE_BLOCK;
-          WAIT_FOR_GPIF_DONE();
-          GPIFSGLDATLX = CMD_ERASE_CONFIRM;
-          WAIT_FOR_GPIF_DONE();
-        } else {
-          state = STATE_IDLE;
-          busy = FALSE;
-        }
+      if(poll_dq6()){     // Erase completed
+        state = STATE_IDLE;
+        busy = FALSE;
       }
       break;
 
@@ -381,7 +357,7 @@ void ifc_process(void)
           break;
         }
 
-        if(!poll_status_reg_ready())
+        if(!poll_dq6())
           break;
 
         if((GPIFADRH == 0x01) && (GPIFADRL == 0xFF)){
@@ -389,7 +365,7 @@ void ifc_process(void)
           update_hiaddr();
         }
 
-        GPIFSGLDATLX = CMD_PROGRAM;
+        GPIFSGLDATLX = CMD_AUTO_PROGRAM;  // program byte command
         WAIT_FOR_GPIF_DONE();
 
         GPIFTCB0 = 0x01; SYNCDELAY; // 1 transaction
