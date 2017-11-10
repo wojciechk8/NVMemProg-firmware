@@ -25,7 +25,7 @@ ASRC:=dscr.a51
 
 # Memory interface modules
 IFCMODDIR:=ifc_mod
-IFCMODSRC:=dummy.c mx28f.c 29lv.c mbm27c.c 27c512.c 28f.c am27.c
+IFCMODSRC:=dummy.c mx28f.c 29lv.c mbm27c.c 27c512.c 28f.c am27.c 29c.c
 
 # Other include directories
 INCDIR:=.
