@@ -10,3 +10,5 @@
 - Test CMD_DRIVER_READ_ID
 - Test CMD_DRIVER_WRITE_ID
 - Test new driver handling (CMD_DRIVER_RESET)
+
+- add ifc_ready to status (replace with busy)
