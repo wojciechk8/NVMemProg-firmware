@@ -29,18 +29,20 @@ The compiled firmware can be loaded into EZ-USB microcontroller either manually
 ```
 make program IFC=[module name]
 ```
-or automatically in the [host software](https://github.com/wojciechk8/NVMemProg_host), when
+or automatically in the [host software](https://github.com/wojciechk8/NVMemProg_host), by
 requesting an operation on a memory device.
-
-
-### USB Endpoints utilization
-The following endpoints are used to communicate through the USB bus:
-* EP0:    Control endpoint, commands handling
-* EP1OUT: FPGA configuration
-* EP1IN:  Status reporting
-* EP2OUT: Data transferred to the memory
-* EP6IN:  Data read from the memory
-
 
 ### License
 This firmware is licensed under GPL version 3. See the COPYING file for the full text of the license.
+
+
+### Miscellaneous information
+
+#### USB Endpoints utilization
+The following endpoints are used to communicate through USB:
+* EP0:    Control endpoint, commands handling
+* EP1IN:  Status reporting
+* EP2OUT: Data write transfer to a memory device
+* EP6IN:  Data read transfer from a memory device
+
+
