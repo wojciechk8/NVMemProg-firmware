@@ -1,6 +1,3 @@
-- Wrappers or macros to EZ-USB specific operations, which are not covered by fx2lib
-  (sth like fx2lib extension).
-
 - Move dscr.a51 contents to C file
 
 - Test CMD_FPGA_READ_REGS
