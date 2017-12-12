@@ -1,4 +1,4 @@
-Firmware for the [NVMemProg](https://github.com/wojciechk8/NVMemProg) memory programmer.
+## Firmware for the [NVMemProg](https://github.com/wojciechk8/NVMemProg-hardware) memory programmer.
 
 
 ### Building
@@ -29,7 +29,7 @@ The compiled firmware can be loaded into EZ-USB microcontroller either manually
 ```
 make program IFC=[module name]
 ```
-or automatically in the [host software](https://github.com/wojciechk8/NVMemProg_host), by
+or automatically in the [host software](https://github.com/wojciechk8/NVMemProg-host), by
 requesting an operation on a memory device.
 
 ### License
