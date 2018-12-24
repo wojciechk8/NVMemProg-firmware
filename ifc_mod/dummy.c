@@ -18,7 +18,7 @@
  * Dummy interface
  *
  */
- 
+
 #include <fx2types.h>
 
 #include "module.h"

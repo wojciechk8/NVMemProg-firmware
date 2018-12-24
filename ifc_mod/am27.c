@@ -58,22 +58,22 @@ enum WRITE_STATE{
 
 const __code BYTE wave_data[128] =
 {
-// Wave 0 
+// Wave 0
 /* LenBr */ 0x0E,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 1 
+// Wave 1
 /* LenBr */ 0x64,     0x11,     0x64,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x02,     0x03,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x26,     0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x3F,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
-// Wave 2 
+// Wave 2
 /* LenBr */ 0x0B,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
-// Wave 3 
+// Wave 3
 /* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x06,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
@@ -168,7 +168,7 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
   if(state != STATE_IDLE){
     return FALSE;
   }
-  
+
   switch (type) {
     case IFC_ID_MANUFACTURER:
       GPIFADRL = 0x00; SYNCDELAY;
@@ -179,7 +179,7 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
     default:
       return FALSE;
   }
-  
+
   dummy = GPIFSGLDATLX;  // trigger read sequence
   while(!IS_GPIF_DONE())
     ;
@@ -230,7 +230,7 @@ BOOL ifc_prepare_write(void)
   if(state != STATE_IDLE){
     return FALSE;
   }
-  
+
   // Timer 0
   TMOD = 0x00;    // Mode 0 (13bit); timer
   CKCON = 0x01;   // Timer source: CLKOUT/12 (4MHz)
@@ -293,7 +293,7 @@ void ifc_abort(void)
 void ifc_process(void)
 {
   BYTE ver_byte;
-  
+
   switch(state){
     case STATE_IDLE:
       return;
@@ -314,11 +314,11 @@ void ifc_process(void)
         case WRITE_STATE_IDLE:
           if(EP2468STAT & bmEP2EMPTY)
             break;
-          
+
           SYNCDELAY;
           FIFORESET = bmNAKALL; SYNCDELAY; // nak all OUT pkts. from host
           FIFORESET = 0x82;     SYNCDELAY; // advance all EP2 buffers to cpu domain
-          
+
           ep_byte_cnt = ((WORD)EP2BCH << 8); SYNCDELAY;
           ep_byte_cnt |= EP2BCL;
           write_byte_cnt = 0;
@@ -326,7 +326,7 @@ void ifc_process(void)
           write_state = WRITE_STATE_PROGRAM;
           busy = TRUE;
           break;
-        
+
         case WRITE_STATE_PROGRAM:
           GPIF_INT_READY_UNSET();
           GPIFSGLDATLX = EP2FIFOBUF[write_byte_cnt];  // start writing a byte from FIFO
@@ -336,7 +336,7 @@ void ifc_process(void)
           TR0 = 1;  // start timer
           write_state = WRITE_STATE_PGM_PULSE;
           break;
-        
+
         case WRITE_STATE_PGM_PULSE:
           if(TF0){                      // 2ms elapsed
             TR0 = 0;                    // stop timer
@@ -346,12 +346,12 @@ void ifc_process(void)
             write_state = WRITE_STATE_VERIFY;
           }
           break;
-        
+
         case WRITE_STATE_VERIFY:
           ver_byte = GPIFSGLDATLX;   // trigger read sequence
           WAIT_FOR_GPIF_DONE();
           ver_byte = GPIFSGLDATLNOX;
-          
+
           verify_cnt++;
           if((ver_byte == EP2FIFOBUF[write_byte_cnt])  // verified ok
              || (verify_cnt == 10)){
@@ -366,24 +366,24 @@ void ifc_process(void)
             write_state = WRITE_STATE_PROGRAM;
           }
           break;
-        
+
         case WRITE_STATE_VERIFY_PGM_PULSE:
           if(TF0){  // 2ms elapsed since last overflow
             if(!(--verify_cnt)){          // verify_cnt * 2ms elapsed
               TR0 = 0;                    // stop timer
               GPIF_INT_READY_SET();
               WAIT_FOR_GPIF_DONE();
-              
+
               gpif_addr++;
               if(*(((BYTE*)(&gpif_addr))+1) == 2){  // gpif_addr == 0x200
                 gpif_addr = 0;
                 hiaddr++;
                 update_hiaddr();
               }
-              
+
               GPIFADRH = *(((BYTE*)(&gpif_addr))+1); SYNCDELAY;
               GPIFADRL = *((BYTE*)(&gpif_addr));   SYNCDELAY;
-              
+
               if(++write_byte_cnt == ep_byte_cnt){
                 OUTPKTEND = 0x82; SYNCDELAY; // skip pkt.
                 FIFORESET = 0x00;            // release nak all

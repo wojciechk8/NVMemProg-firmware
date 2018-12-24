@@ -113,7 +113,7 @@ BOOL handle_vendorcommand(BYTE cmd)
 {
   BYTE i;
   WORD cnt;
-  
+
   switch((VENDOR_CMD)cmd){
     case CMD_LED:
       if(SETUP_INDEX_LSB() == 0){
@@ -135,7 +135,7 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
-    
+
     case CMD_FPGA_WRITE_CONFIG:
       if(fpga_get_status() != FPGA_STATUS_CONFIGURING){
         STALLEP0();
@@ -162,7 +162,7 @@ BOOL handle_vendorcommand(BYTE cmd)
       AUTOPTR_TRANSFER(SETUP_LENGTH_LSB());
       EP0BCL = SETUP_LENGTH_LSB();
       break;
-    
+
     case CMD_FPGA_WRITE_REGS:
       WAIT_FOR_EP0_DATA();
       LOAD_AUTOPTR1(EP0BUF);
@@ -193,13 +193,13 @@ BOOL handle_vendorcommand(BYTE cmd)
         STALLEP0();
       }
       break;
-    
+
     case CMD_DRIVER_CONFIG_PIN:
       if(!driver_config_pin(SETUP_INDEX_LSB(), SETUP_VALUE_LSB())){
         STALLEP0();
       }
       break;
-    
+
     case CMD_DRIVER_ENABLE:
       if(SETUP_VALUE_LSB() == 0xA5){
         if(!driver_enable()){
@@ -424,7 +424,7 @@ void main()
   EA = 1;
 
   RENUMERATE();
-  
+
   GPIO_LEDG_ON();
 
   while(TRUE){

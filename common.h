@@ -68,15 +68,15 @@ typedef enum{                 // wValue         wIndex          IN/OUT data
 
   CMD_EEPROM_READ=0x50,       // ---            addr            data
   CMD_EEPROM_WRITE=0x51,      // ---            addr            data
-  
-  
+
+
   CMD_IFC_SET_CONFIG=0x60,    // param          config_type     data(optional)
   CMD_IFC_READ_ID=0x61,       // ---            id_type         id
   CMD_IFC_ERASE_CHIP=0x62,    // ---            ---             ---
   CMD_IFC_READ_DATA=0x63,     // ---            ---             ---(data via EP6)
   CMD_IFC_WRITE_DATA=0x64,    // ---            ---             ---(data via EP2)
   CMD_IFC_ABORT=0x6F,         // ---            ---             ---
-  
+
   // this is a built-in command
   CMD_FIRMWARE_LOAD=0xA0      // addr           ---             data
 }VENDOR_CMD;
@@ -98,7 +98,7 @@ typedef enum{
  *   25-29: ctl_fx [0-4]
  *   30: '0'
  *   31: '1'
- *   
+ *
  *   The MSB (bit 5) is output enable
  *   (the actual OE depends also on data_dir(ctl_fx[5]),
  *    if selected signal is data_fx)

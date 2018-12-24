@@ -58,22 +58,22 @@ enum IFC_STATE{
 
 const __code BYTE wave_data[128] =
 {
-// Wave 0 
+// Wave 0
 /* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 1 
+// Wave 1
 /* LenBr */ 0x06,     0x01,     0x07,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x02,     0x02,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
-// Wave 2 
+// Wave 2
 /* LenBr */ 0x04,     0x01,     0x02,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x0A,     0x00,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x02,     0x02,     0x06,     0x06,     0x06,     0x06,     0x06,     0x06,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
-// Wave 3 
+// Wave 3
 /* LenBr */ 0x01,     0x06,     0x01,     0x03,     0x3F,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x0A,     0x02,     0x02,     0x04,     0x01,     0x00,     0x00,     0x00,
 /* Output*/ 0x26,     0x24,     0x26,     0x06,     0x06,     0x06,     0x06,     0x06,
@@ -212,7 +212,7 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
   if(state != STATE_IDLE){
     return FALSE;
   }
-  
+
   switch (type) {
     case IFC_ID_MANUFACTURER:
       GPIFADRL = 0x00; SYNCDELAY;
@@ -223,7 +223,7 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
     default:
       return FALSE;
   }
-  
+
   dummy = GPIFSGLDATLX;  // trigger read sequence
   WAIT_FOR_GPIF_DONE();
   id[0] = GPIFSGLDATLNOX;
@@ -348,7 +348,7 @@ void ifc_abort(void)
 void ifc_process(void)
 {
   WORD hiaddr_save;
-  
+
   switch(state){
     case STATE_IDLE:
       return;
@@ -377,24 +377,24 @@ void ifc_process(void)
           busy = FALSE;
           break;
         }
-        
+
         if(!poll_dq6())
           break;
-        
+
         sector ^= 0x01;
         if(sector & 0x01){
           hiaddr++;
         }
-        
+
         hiaddr_save = hiaddr;
-        
+
         memory_command_sequence(CMD_PROGRAM);
-        
+
         hiaddr = hiaddr_save;
         update_hiaddr();
         GPIFADRH = sector; SYNCDELAY;
         GPIFADRL = 0xFF;   SYNCDELAY;
-        
+
         // Reload Transaction Counter
         GPIFTCB1 = 0x01; SYNCDELAY; // 256 transactions (sector-basis programming)
         GPIFTCB0 = 0x00; SYNCDELAY;

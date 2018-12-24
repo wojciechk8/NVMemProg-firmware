@@ -51,22 +51,22 @@ enum IFC_STATE{
 
 const __code BYTE wave_data[128] =
 {
-// Wave 0 
+// Wave 0
 /* LenBr */ 0x08,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x02,     0x05,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x00,     0x00,     0x04,     0x04,     0x04,     0x04,     0x04,     0x04,
 /* LFun  */ 0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 1 
+// Wave 1
 /* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x04,     0x04,     0x04,     0x04,     0x04,     0x04,     0x04,     0x04,
 /* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
-// Wave 2 
+// Wave 2
 /* LenBr */ 0x06,     0x01,     0x01,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x00,     0x0A,     0x04,     0x01,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x00,     0x00,     0x00,     0x04,     0x04,     0x04,     0x04,     0x04,
 /* LFun  */ 0x00,     0x00,     0x00,     0x3F,     0x00,     0x00,     0x00,     0x3F,
-// Wave 3 
+// Wave 3
 /* LenBr */ 0x64,     0x11,     0x64,     0x3F,     0x01,     0x01,     0x01,     0x07,
 /* Opcode*/ 0x0A,     0x03,     0x02,     0x05,     0x00,     0x00,     0x00,     0x00,
 /* Output*/ 0x25,     0x24,     0x25,     0x05,     0x05,     0x05,     0x05,     0x04,
@@ -162,7 +162,7 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
   if(state != STATE_IDLE){
     return FALSE;
   }
-  
+
   switch (type) {
     case IFC_ID_MANUFACTURER:
       GPIFADRL = 0x00; SYNCDELAY;
@@ -173,7 +173,7 @@ BOOL ifc_read_id(IFC_ID_TYPE type, BYTE *id)
     default:
       return FALSE;
   }
-  
+
   dummy = GPIFSGLDATLX;  // trigger read sequence
   while(!IS_GPIF_DONE())
     ;
@@ -224,12 +224,12 @@ BOOL ifc_prepare_write(void)
   if(state != STATE_IDLE){
     return FALSE;
   }
-  
+
   // Timer 0
   TMOD = 0x02;    // Mode 2 (8bit with auto-reload); timer
   CKCON = 0x01;   // Timer source: CLKOUT/12 (4MHz)
   ET0 = 0;        // Disable interrupt
-  
+
   // Init Transaction Counter
   GPIFTCB1 = 0x00;       SYNCDELAY;
   GPIFTCB0 = 0x01;       SYNCDELAY;
@@ -311,17 +311,17 @@ void ifc_process(void)
           busy = FALSE;
           break;
         }
-        
+
         if((GPIFADRH == 0x01) && (GPIFADRL == 0xFF)){
           hiaddr++;
           update_hiaddr();
         }
-        
+
         GPIF_INT_READY_UNSET();
         GPIFTCB0 = 0x01; SYNCDELAY; // 1 transaction
         GPIFTRIG = 0x0;             // trigger EP2 write data transaction
         busy = TRUE;
-        
+
         // Timer
         TH0 = 256 - 200; TL0 = 256 - 200; // 200 cycles = 50us
         TF0 = 0;  // clear overflow flag
