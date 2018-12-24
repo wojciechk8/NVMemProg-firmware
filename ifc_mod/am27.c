@@ -155,6 +155,9 @@ BOOL ifc_set_config(IFC_CFG_TYPE type, WORD param, BYTE data_len)
       AUTOPTR_TRANSFER(data_len);
       hiaddr_size = data_len;
       break;
+
+    default:
+      return FALSE;
   }
 
   return TRUE;
