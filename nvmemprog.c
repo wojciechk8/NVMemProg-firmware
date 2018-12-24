@@ -278,7 +278,9 @@ BOOL handle_vendorcommand(BYTE cmd)
       if(SETUP_LENGTH_LSB() != 0)
         WAIT_FOR_EP0_DATA();
       LOAD_AUTOPTR1(EP0BUF);
-      if(!ifc_set_config(SETUP_INDEX_LSB(), SETUP_VALUE(), SETUP_LENGTH_LSB())){
+      if (SETUP_INDEX_LSB() == IFC_CFG_IFCLK){
+        IFCONFIG = (IFCONFIG & ~bm3048MHZ) | (SETUP_VALUE_LSB() ? bm3048MHZ : 0);
+      }else if(!ifc_set_config(SETUP_INDEX_LSB(), SETUP_VALUE(), SETUP_LENGTH_LSB())){
         STALLEP0();
       }
       break;

@@ -137,8 +137,8 @@ BOOL poll_dq6(void)
 void ifc_init(void)
 {
   // GPIF config
-  IFCONFIG = bmIFCLKSRC|bm3048MHZ   // IFCLK = Internal 48MHz
-             |bmIFGPIF;             // ports in GPIF master mode
+  IFCONFIG = bmIFCLKSRC // internal IFCLK
+             |bmIFGPIF; // ports in GPIF master mode
 
   GPIFABORT = 0xFF;       // abort any waveforms pending
 
