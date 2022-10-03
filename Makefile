@@ -111,7 +111,7 @@ iic: $(IIC)
 program: $(IHX)
 	$(FX2PROG) -id=$(VID).$(PID) prg:$(BINDIR)/$(IFC).ihx
 	$(FX2PROG) -id=$(VID).$(PID) run
-	tail -n 5 $(MEM)
+	tail -n 5 $(BINDIR)/$(IFC).mem
 
 .PHONY: run
 run: $(IHX)

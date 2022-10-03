@@ -48,4 +48,5 @@
 #define WAIT_FOR_GPIF_DONE() do{ while(!IS_GPIF_DONE()); }while(0)
 
 #define IS_EP2_FIFO_EMPTY() (EP24FIFOFLGS & bmBIT1)
+#define IS_EP6_FIFO_FULL() (EP68FIFOFLGS & bmBIT0)
 

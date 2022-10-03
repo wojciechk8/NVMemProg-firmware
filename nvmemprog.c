@@ -359,7 +359,7 @@ void device_init(void)
   EP2CFG = bmVALID|bmTYPE1|0x2;       SYNCDELAY;  // BULK OUT 512B X2
   EP6CFG = bmVALID|bmDIR|bmTYPE1|0x2; SYNCDELAY;  // BULK IN 512B X2
   EP4CFG = bmTYPE1;                   SYNCDELAY;  // OFF
-  EP8CFG = bmTYPE1;                               // OFF
+  EP8CFG = bmTYPE1;                   SYNCDELAY;  // OFF
 }
 
 

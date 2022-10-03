@@ -9,3 +9,7 @@
 - Test new driver handling (CMD_DRIVER_RESET)
 
 - add ifc_ready to status (replace with busy)
+
+- report error count (ERRCNTLIM) in device status
+
+- no need to switch between manual and auto FIFO mode (could remain in auto)

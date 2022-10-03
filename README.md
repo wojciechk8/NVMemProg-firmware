@@ -45,5 +45,5 @@ The following endpoints are used to communicate through USB:
 * EP2OUT: Data write transfer to a memory device
 * EP6IN:  Data read transfer from a memory device
 
-#### LAST_COMMIT
+#### TESTED_COMMIT
 This file indicates which commit was tested most recently in the real hardware.

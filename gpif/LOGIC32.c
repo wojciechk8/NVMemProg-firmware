@@ -22,14 +22,14 @@
                          
 // GPIF Ctrl Outputs   Level   
 // CTL 0    = HIWORD   CMOS        
-// CTL 1    = WE#      CMOS        
+// CTL 1    = NEXTD    CMOS        
 // CTL 2    = OE#      CMOS        
 // CTL 3    = CTL3     CMOS        
 // CTL 4    = CTL4     CMOS        
 // CTL 5    = DIR      CMOS        
                                
 // GPIF Rdy Inputs         
-// RDY0     = DATAVAIL       
+// RDY0     = DAVAIL         
 // RDY1     = RDY1           
 // RDY2     = RDY2           
 // RDY3     = RDY3           
@@ -58,7 +58,7 @@
 // Re-Exec                                                                                 
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // HIWORD       0         0         0         0         0         0         0         0    
-// WE#          0         0         0         0         0         0         0         0    
+// NEXTD        0         0         0         0         0         0         0         0    
 // OE#          0         0         0         0         0         0         0         0    
 // CTL3         0         0         0         0         0         0         0         0    
 // CTL4         0         0         0         0         0         0         0         0    
@@ -85,7 +85,7 @@
 // Re-Exec                                                                                 
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // HIWORD       0         0         0         0         0         0         0         0    
-// WE#          0         0         0         0         0         0         0         0    
+// NEXTD        0         0         0         0         0         0         0         0    
 // OE#          0         0         0         0         0         0         0         0    
 // CTL3         0         0         0         0         0         0         0         0    
 // CTL4         0         0         0         0         0         0         0         0    
@@ -103,16 +103,16 @@
 // DataMode Activate  NO Data   Activate  NO Data   NO Data   NO Data   NO Data            
 // NextData SameData  SameData  SameData  SameData  SameData  SameData  SameData           
 // Int Trig No Int    No Int    No Int    No Int    No Int    No Int    No Int             
-// IF/Wait  Wait 1    Wait 1    Wait 1    IF        Wait 1    Wait 1    Wait 1             
-//   Term A                               DATAVAIL                                         
-//   LFunc                                AND                                              
-//   Term B                               DATAVAIL                                         
-// Branch1                                Then 0                                           
-// Branch0                                Else 3                                           
-// Re-Exec                                No                                               
+// IF/Wait  Wait 1    Wait 1    Wait 1    IF        IF        Wait 1    Wait 1             
+//   Term A                               DAVAIL    DAVAIL                                 
+//   LFunc                                AND       AND                                    
+//   Term B                               DAVAIL    DAVAIL                                 
+// Branch1                                Then 0    Then 0                                 
+// Branch0                                Else 4    Else 4                                 
+// Re-Exec                                No        No                                     
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // HIWORD       0         1         1         0         0         0         0         0    
-// WE#          0         0         0         0         0         0         0         0    
+// NEXTD        0         0         0         1         0         0         0         0    
 // OE#          0         0         0         0         0         0         0         0    
 // CTL3         0         0         0         0         0         0         0         0    
 // CTL4         0         0         0         0         0         0         0         0    
@@ -139,7 +139,7 @@
 // Re-Exec                                                                                 
 // Sngl/CRC Default   Default   Default   Default   Default   Default   Default            
 // HIWORD       0         0         0         0         0         0         0         0    
-// WE#          0         0         0         0         0         0         0         0    
+// NEXTD        0         0         0         0         0         0         0         0    
 // OE#          0         0         0         0         0         0         0         0    
 // CTL3         0         0         0         0         0         0         0         0    
 // CTL4         0         0         0         0         0         0         0         0    
@@ -169,9 +169,9 @@ const char xdata WaveData[128] =
 /* Output*/ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,
 /* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 2 
-/* LenBr */ 0x01,     0x01,     0x01,     0x03,     0x01,     0x01,     0x01,     0x07,
-/* Opcode*/ 0x02,     0x00,     0x02,     0x01,     0x00,     0x00,     0x00,     0x00,
-/* Output*/ 0x00,     0x01,     0x01,     0x00,     0x00,     0x00,     0x00,     0x00,
+/* LenBr */ 0x01,     0x01,     0x01,     0x04,     0x04,     0x01,     0x01,     0x07,
+/* Opcode*/ 0x02,     0x00,     0x02,     0x01,     0x01,     0x00,     0x00,     0x00,
+/* Output*/ 0x00,     0x01,     0x01,     0x02,     0x00,     0x00,     0x00,     0x00,
 /* LFun  */ 0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x00,     0x3F,
 // Wave 3 
 /* LenBr */ 0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x01,     0x07,

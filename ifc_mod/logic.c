@@ -77,8 +77,10 @@ static volatile __bit busy = FALSE;
 void ifc_init(void)
 {
   // GPIF config
-  IFCONFIG = bmIFCLKSRC // internal IFCLK
-             |bmIFGPIF; // ports in GPIF master mode
+  IFCONFIG = bmIFCLKSRC   // internal IFCLK
+             |bmIFCLKOE   // ifclk pin output enable
+             |bmIFCLKPOL  // inverted polarity
+             |bmIFGPIF;   // ports in GPIF master mode
 
   GPIFABORT = 0xFF;       // abort any waveforms pending
 
@@ -88,7 +90,8 @@ void ifc_init(void)
   GPIFIDLECTL = 0x00;
   GPIFWFSELECT = 0x4E;
   GPIFREADYSTAT = 0x00;
-  GPIFHOLDAMOUNT = 0x01;  // 1/2 IFCLK hold time
+  GPIFHOLDAMOUNT = 0x00;
+  GPIFREADYCFG = bmBIT6; // SAS: Synchronous RDY signals
 
   // Load WaveData
   LOAD_AUTOPTR1(wave_data);
@@ -136,6 +139,13 @@ BOOL ifc_prepare_read(void)
 
   // Init Transaction Counter (not used, but must be set to start the waveform)
   GPIFTCB0 = 0x01;       SYNCDELAY;
+  // Don't use transaction counter - stop on fifo flag, which will never set (run indefinitely)
+  EP6GPIFPFSTOP = 0x01;  SYNCDELAY;
+  EP6FIFOPFH = (1<<7)   // DECIS = 1 (set PF when fifo_cnt > preset)
+               |(0<<6)  // PKTSTAT = 0 (count packets)
+               |(7<<3); // PKTS = 7 (set number of packets that will never be achieved)
+               SYNCDELAY;
+  EP6GPIFFLGSEL = 0x00;  SYNCDELAY; // fifo programmable flag
 
   // Reset EP6 FIFO
   FIFORESET = bmNAKALL;  SYNCDELAY;
