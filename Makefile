@@ -31,7 +31,7 @@ IFCMODSRC:=dummy.c mx28f.c 29lv.c mbm27c.c 27c512.c 28f.c am27.c 29c.c logic.c
 INCDIR:=.
 
 # Fx2lib directory
-FX2LIBDIR:=/opt/fx2lib
+FX2LIBDIR?=/opt/fx2lib
 
 # Target objects directory
 OBJDIR:=obj
@@ -75,7 +75,7 @@ SIZE:=size
 FX2PROG:=cycfx2prog
 
 # Common flags
-COMMON_FLAGS:=-mmcs51
+COMMON_FLAGS:=-mmcs51 --stack-auto
 # Assembler flags
 ASFLAGS:=
 # C flags
